@@ -1,4 +1,3 @@
-#!/usr/bin/env swift
 // Comprueba datos/*.json y escribe con ellos el equipo, las quedadas y los patrocinadores en index.html.
 //
 // Solo toca lo que hay entre cada par de marcas:
@@ -7,49 +6,18 @@
 // El resto de la página no se toca, y pasarlo dos veces da lo mismo.
 //
 // Uso, desde la raíz del repo:
-//     swift scripts/generar.swift              comprueba los datos y escribe index.html
-//     swift scripts/generar.swift --comprobar  solo comprueba: que los datos están bien y que index.html está al día
+//     swift run generar              comprueba los datos y escribe index.html
+//     swift run generar --comprobar  solo comprueba: que los datos están bien y que index.html está al día
 
 import Foundation
+import HolaSwift
 
-let raiz = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+let raiz = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()   // Sources/Generar/main.swift
 let pagina = raiz.appending(path: "index.html")
 let madrid = TimeZone(identifier: "Europe/Madrid")!
 
-// MARK: - Datos
-
-struct Persona: Decodable {
-    let nombre, rol, foto, bio: String
-    let x, linkedin, web: String?
-}
-
-/// Una quedada online: un título propio y de 1 a 3 charlas.
-struct Quedada: Decodable {
-    let fecha, titulo: String
-    let notas, enlace: String?
-    let demo: Bool?
-    let charlas: [Charla]
-}
-
-/// Cada charla dura 20 minutos como mucho. `tipo` solo se pone si es un taller.
-struct Charla: Decodable {
-    let titulo: String
-    let ponentes: [Ponente]?
-    let tipo, descripcion: String?
-    var esTaller: Bool { tipo == "Taller" }
-}
-
-/// Sin foto, en su círculo salen sus iniciales.
-struct Ponente: Decodable {
-    let nombre: String
-    let foto: String?
-}
-
-/// Una marca que patrocina: su logo en el muro de la sección de patrocinio, enlazado a su web.
-struct Patrocinador: Decodable {
-    let nombre, logo: String
-    let web: String?
-}
+// MARK: - Leer y comprobar
 
 let camposPersona: Set = ["nombre", "rol", "foto", "bio", "x", "linkedin", "web"]
 let camposQuedada: Set = ["fecha", "titulo", "notas", "enlace", "demo", "charlas"]
@@ -57,7 +25,6 @@ let camposCharla: Set = ["titulo", "ponentes", "tipo", "descripcion"]
 let camposPonente: Set = ["nombre", "foto"]
 let camposPatrocinador: Set = ["nombre", "logo", "web"]
 
-/// Lee un JSON de datos/ y apunta en `errores` todo lo que no cuadre, con el número de entrada para encontrarlo rápido.
 func leer<T: Decodable>(_ archivo: String, campos: Set<String>, charlas: Set<String> = [], errores: inout [String]) -> [T] {
     guard let datos = try? Data(contentsOf: raiz.appending(path: "datos/\(archivo)")) else {
         errores.append("\(archivo): no se encuentra"); return []
@@ -65,7 +32,6 @@ func leer<T: Decodable>(_ archivo: String, campos: Set<String>, charlas: Set<Str
     guard let lista = try? JSONSerialization.jsonObject(with: datos) as? [[String: Any]] else {
         errores.append("\(archivo): no es un JSON válido o no es una lista [ … ] (revisa comas y comillas)"); return []
     }
-    // cada entrada por separado, para avisar de todos los fallos de una vez y no solo del primero
     return lista.enumerated().compactMap { i, item in
         let donde = "\(archivo) #\(i + 1)"
         let sobran = Set(item.keys).subtracting(campos)
@@ -144,7 +110,14 @@ func comprobar(_ quedadas: [Quedada], errores: inout [String]) {
     }
 }
 
-// MARK: - Tarjetas
+func momento(_ d: Date) -> Momento {
+    var calendario = Calendar(identifier: .gregorian)
+    calendario.timeZone = madrid
+    let c = calendario.dateComponents([.year, .month, .day, .hour, .minute], from: d)
+    return Momento(ms: d.timeIntervalSince1970 * 1000, anio: c.year!, mes: c.month!, dia: c.day!, hora: c.hour!, minuto: c.minute!)
+}
+
+// MARK: - Equipo y patrocinio (solo los escribe el generador)
 
 let iconos = [
     "x": #"<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M12.2 1.5h2.2L9.6 7l5.6 7.5h-4.4L7.3 10l-4 4.5H1.1L6.2 8.6.8 1.5h4.5l3.1 4.2 3.8-4.2Zm-.8 11.7h1.2L4.7 2.7H3.4l8 10.5Z"/></svg>"#,
@@ -152,19 +125,12 @@ let iconos = [
     "web": #"<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1"/></svg>"#,
 ]
 let iconoMas = #"<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>"#
-let meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
-
-/// Igual que el esc() del script de la página.
-func esc(_ t: String) -> String {
-    t.replacing("&", with: "&amp;").replacing("<", with: "&lt;").replacing(">", with: "&gt;").replacing("\"", with: "&quot;")
-}
 
 func foto(_ p: Persona) -> String {
     #"<img class="foto" src="\#(esc(p.foto))" alt="\#(esc(p.nombre))" width="800" height="1000" loading="lazy">"#
 }
 
 func datos(_ p: Persona) -> String {
-    // el texto tras "en" lo usa la ficha del embajador para la etiqueta del botón
     let redes = [("x", p.x, "X"), ("linkedin", p.linkedin, "LinkedIn"), ("web", p.web, "su web")].compactMap { clave, url, red in
         url.map { #"<a href="\#(esc($0))" target="_blank" rel="noopener me" aria-label="\#(esc(p.nombre)) en \#(red)">\#(iconos[clave]!)</a>"# }
     }.joined()
@@ -192,91 +158,6 @@ func embajador(_ p: Persona, _ i: Int) -> String {
     """#
 }
 
-/// De las que ya pasaron solo se enseñan las más recientes (igual que en el script de la página).
-let pasadas = 3
-
-/// "Charla", "3 charlas", "Taller" o "2 charlas y 1 taller", según lo que traiga la quedada.
-func categoria(_ q: Quedada) -> String {
-    let talleres = q.charlas.filter(\.esTaller).count, charlas = q.charlas.count - talleres
-    func cuenta(_ n: Int, _ uno: String, _ varios: String) -> String { n == 1 ? "1 \(uno)" : "\(n) \(varios)" }
-    if talleres == 0 { return charlas == 1 ? "Charla" : cuenta(charlas, "charla", "charlas") }
-    if charlas == 0 { return talleres == 1 ? "Taller" : cuenta(talleres, "taller", "talleres") }
-    return "\(cuenta(charlas, "charla", "charlas")) y \(cuenta(talleres, "taller", "talleres"))"
-}
-
-/// "Ana", "Ana y Pol", "Ana, Pol y Asier", con "e" delante de i- e hi- ("Pol e Íñigo", pero "Ana y Hielo"): la misma regla que listaEs() en la página.
-func ponentes(_ c: Charla) -> String {
-    guard let nombres = c.ponentes?.map(\.nombre), let ultimo = nombres.last else { return "Ponente por confirmar" }
-    if nombres.count == 1 { return ultimo }
-    let inicio = ultimo.lowercased().folding(options: .diacriticInsensitive, locale: nil)
-    let e = (inicio.hasPrefix("i") || inicio.hasPrefix("hi")) && !["hia", "hie", "hio", "hiu"].contains(where: inicio.hasPrefix)
-    return nombres.dropLast().joined(separator: ", ") + (e ? " e " : " y ") + ultimo
-}
-
-/// "JO" de "Jon Ander Orcera": la primera letra del nombre y la del último apellido.
-func iniciales(_ nombre: String) -> String {
-    let partes = nombre.split(separator: " ")
-    let elegidas = partes.count > 1 ? [partes.first!, partes.last!] : partes
-    return elegidas.compactMap { $0.first.map(String.init) }.joined().uppercased()
-}
-
-/// La pila de caras de una charla, igual que caras() en la página.
-func caras(_ c: Charla) -> String {
-    let dentro = c.ponentes.flatMap { $0.isEmpty ? nil : $0 }.map { lista in
-        lista.map { p in p.foto.map { #"<img src="\#(esc($0))" alt="" loading="lazy">"# } ?? "<i>\(esc(iniciales(p.nombre)))</i>" }.joined()
-    } ?? "<i></i>"
-    return #"<span class="caras" aria-hidden="true">\#(dentro)</span>"#
-}
-
-/// Las mismas tarjetas que pinta el script de la página. «El próximo» y «Ya pasó» salen del día en que se genera;
-/// la página los vuelve a calcular al cargar, con la fecha de quien la visita.
-/// Una quedada pasa a «Ya pasó» al día siguiente (hora de Madrid), no al empezar: todo su día sigue siendo «El próximo».
-func tarjetas(_ quedadas: [Quedada], ahora: Date) -> String {
-    if quedadas.isEmpty {
-        return #"""
-        <article class="evento vacio reveal"><img src="assets/img/glifos/arroba.webp" alt="" aria-hidden="true">
-          <h3>Las primeras quedadas, muy pronto.</h3><p>Estamos preparando las primeras charlas. Apúntate y te avisamos de cada una.</p>
-          <button class="btn" type="button" data-abre-apunte>Avísame</button></article>
-        <div class="evento hueco reveal" aria-hidden="true">Próxima quedada</div>
-        <div class="evento hueco reveal" aria-hidden="true">Próxima quedada</div>
-        """#
-    }
-    var calendario = Calendar(identifier: .gregorian)
-    calendario.timeZone = madrid
-    let dia = { (d: Date) -> String in
-        let c = calendario.dateComponents([.year, .month, .day], from: d)
-        return String(format: "%04d-%02d-%02d", c.year!, c.month!, c.day!)
-    }
-    // en orden de fecha: primero las últimas que ya pasaron y luego las que vienen
-    let todas = quedadas.enumerated().map { i, q in
-        let d = fecha(q.fecha)!
-        return (i: i, q: q, d: d, pasado: dia(d) < dia(ahora))
-    }.sorted { $0.d < $1.d }
-    let lista = todas.filter { $0.pasado }.suffix(pasadas) + todas.filter { !$0.pasado }
-    var visto = false
-    return lista.map { i, q, d, pasado in
-        let proximo = !pasado && !visto
-        if proximo { visto = true }
-        let c = calendario.dateComponents([.day, .month, .hour, .minute], from: d)
-        let hora = String(format: "%02d:%02d", c.hour!, c.minute!)
-        let clases = "evento reveal" + (pasado ? " pasado" : "") + (proximo ? " proximo" : "")
-        let donde = "\(categoria(q)) · \(hora) (Madrid)" + (pasado ? "" : #"<span class="en-discord"> · Discord</span>"#)   // en las filas compactas del móvil no cabe
-        let prox = proximo ? #"<span class="estado">El próximo</span>"# : pasado ? #"<span class="estado">Ya pasó</span>"# : ""
-        let charlas = q.charlas.map { #"<li>\#(caras($0))<div><b>\#(esc($0.titulo))</b><span>\#(esc(ponentes($0)))</span></div></li>"# }.joined()
-        let anchoCaras = max(1, q.charlas.map { $0.ponentes?.count ?? 0 }.max() ?? 0)   // la pila más ancha de la tarjeta
-        let ejemplo = q.demo == true ? #"<span class="ejemplo">Ejemplo</span>"# : ""
-        return #"""
-        <article class="\#(clases)">
-          \#(prox)<p class="dia">\#(c.day!)</p><p class="mes">\#(meses[c.month! - 1])</p>
-          <h3>\#(esc(q.titulo))</h3>
-          <ul class="charlas" style="--caras:\#(anchoCaras)">\#(charlas)</ul>
-          <span class="donde">\#(donde)</span>\#(ejemplo)
-          <button class="cubre" type="button" data-evento="\#(i)" aria-haspopup="dialog" aria-label="Ver \#(esc(q.titulo))"></button></article>
-        """#
-    }.joined(separator: "\n")
-}
-
-/// El JSON tal cual, para que la página repinte las tarjetas con la fecha del día en que se visita.
 func datosQuedadas() throws -> String {
     let json = try String(contentsOf: raiz.appending(path: "datos/quedadas.json"), encoding: .utf8)
     return "<script type=\"application/json\" id=\"quedadas-datos\">\n"
@@ -305,7 +186,6 @@ enum Fallo: Error, CustomStringConvertible {
     }
 }
 
-/// Sustituye lo que hay entre las marcas de `nombre`, con la misma sangría que tiene la marca de apertura.
 func rellenar(_ html: String, _ nombre: String, _ contenido: String) throws -> String {
     let abre = "<!-- generado:\(nombre) ", cierra = "<!-- /generado:\(nombre) -->"
     let aperturas = html.ranges(of: abre)
@@ -346,15 +226,16 @@ if !errores.isEmpty {
 
 do {
     let actual = try String(contentsOf: pagina, encoding: .utf8)
+    let momentos = quedadas.map { momento(fecha($0.fecha)!) }
     var nueva = try rellenar(actual, "founders", founders.map(founder).joined(separator: "\n"))
     nueva = try rellenar(nueva, "embajadores", embajadores.enumerated().map { embajador($1, $0) }.joined(separator: "\n"))
-    nueva = try rellenar(nueva, "quedadas", tarjetas(quedadas, ahora: .now))
+    nueva = try rellenar(nueva, "quedadas", tarjetas(quedadas, momentos: momentos, hoy: momento(.now)))
     nueva = try rellenar(nueva, "quedadas-datos", datosQuedadas())
     nueva = try rellenar(nueva, "patrocinadores", muro(patrocinadores))
 
     if soloComprobar {
         guard sinEstado(nueva) == sinEstado(actual) else {
-            print("index.html no está al día con datos/*.json: pasa swift scripts/generar.swift")
+            print("index.html no está al día con datos/*.json: pasa swift run generar")
             exit(1)
         }
         print("datos/ correcto e index.html al día")

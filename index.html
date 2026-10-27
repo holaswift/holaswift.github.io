@@ -25,6 +25,15 @@
 <meta property="og:image:alt" content="¡hola Swift! en letras de tubo de colores sobre una cuadrícula de puntos">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@hola_swift">
+<!-- Swift: el .wasm y lo que lo arranca se piden ya desde aquí, a la vez que el resto, y no al llegar al final de la página.
+     El import map va antes que cualquier módulo: una vez empieza a cargarse uno, el navegador ya no lo acepta -->
+<script type="importmap">{ "imports": { "@bjorn3/browser_wasi_shim": "./assets/swift/vendor/browser_wasi_shim/index.js" } }</script>
+<link rel="modulepreload" href="assets/swift/index.js">
+<link rel="modulepreload" href="assets/swift/instantiate.js">
+<link rel="modulepreload" href="assets/swift/runtime.js">
+<link rel="modulepreload" href="assets/swift/platforms/browser.js">
+<link rel="modulepreload" href="assets/swift/vendor/browser_wasi_shim/index.js">
+<link rel="preload" href="assets/swift/Web.wasm" as="fetch" type="application/wasm" crossorigin>
 <link rel="preload" href="assets/fuentes/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fuentes/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/img/logo-horizontal-color.webp" as="image">
@@ -104,6 +113,21 @@ footer .brand img{height:30px}
 .fade{opacity:0;transform:translateY(10px);filter:blur(6px);transition:opacity .9s var(--ease-out),transform .9s var(--ease-out),filter .9s var(--ease-out)}
 .ready .fade{opacity:1;transform:none;filter:none}
 .ready .fade.d2{transition-delay:.12s}
+/* el logo lo anima Swift (Sources/Web/Hero.swift): hasta que arranca no se enseña, para que no se vea un instante a medio
+   montar y vuelva a empezar. Si Swift no llega (navegador sin WebAssembly, o la página abierta como archivo), a los 2,5 s
+   se enseña ya terminado: el logo a color, la mano, los glifos del fondo y el titular con su formulario */
+.hero:not(.animado) .stage{visibility:hidden;animation:hero-ver 0s 2.5s forwards}
+.hero:not(.animado) .vec,.hero:not(.animado) .lead{animation:hero-fuera 0s 2.5s forwards}
+.hero:not(.animado) .el .col{animation:hero-color 0s 2.5s forwards}
+.hero:not(.animado) .mano{animation:hero-mano 0s 2.5s forwards}
+.hero:not(.animado) .fade{animation:hero-texto .9s var(--ease-out) 2.5s forwards}
+.hero:not(.animado) .flota{animation:hero-flota .9s var(--spring) 2.5s forwards}
+@keyframes hero-ver{to{visibility:visible}}
+@keyframes hero-fuera{to{opacity:0}}
+@keyframes hero-color{to{-webkit-mask-image:none;mask-image:none}}
+@keyframes hero-mano{to{transform:rotate(-4deg)}}
+@keyframes hero-texto{to{opacity:1;transform:none;filter:none}}
+@keyframes hero-flota{to{transform:translate3d(0px,0px,0) scale(1) rotate(var(--r))}}
 .wrap{display:grid;place-items:center;perspective:1400px;padding:8px 0;grid-row:2}
 .stage{position:relative;aspect-ratio:3005 / 2345;width:min(84vw,calc(58dvh * (3005 / 2345)));transform-style:preserve-3d}
 .stage svg,.stage .el{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -219,6 +243,10 @@ h2{font-family:var(--f-titulos);font-weight:700;font-size:clamp(34px,5vw,60px);l
 .lede{font-size:clamp(19px,1.7vw,22px);line-height:1.45;color:var(--ink-2);max-width:56ch;text-wrap:pretty}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease-out),transform 1s var(--ease-out)}
 .reveal.in{opacity:1;transform:none}
+/* si Swift no arranca (navegador sin WebAssembly, o la página abierta como archivo), lo que entra al hacer scroll aparece
+   igual a los 2,5 s. Con Swift en marcha, <html data-swift>, esto no se aplica y cada cosa entra al asomar */
+@keyframes sin-swift{to{opacity:1;transform:none}}
+html:not([data-swift]) .reveal,html:not([data-swift]) .manifiesto .sigue{animation:sin-swift .6s var(--ease-out) 2.5s forwards}
 
 /* manifiesto: un momento fijo al hacer scroll. El arranque del manifiesto se enciende palabra a palabra;
    los glifos se juntan alrededor de un sobre cerrado, y el resto del texto está dentro: hay que abrir la carta. */
@@ -379,7 +407,7 @@ h2{font-family:var(--f-titulos);font-weight:700;font-size:clamp(34px,5vw,60px);l
   .cita.naranja .obj{--ot:-6%!important;--or:-8%!important;--ow:52%!important}   /* en móvil, el corazón a la esquina: no tapa el título */
 }
 
-/* eventos: la grilla de quedadas online sale de datos/quedadas.json (añadir una = añadir una entrada y pasar scripts/generar.swift).
+/* eventos: la grilla de quedadas online sale de datos/quedadas.json (añadir una = añadir una entrada y pasar swift run generar).
    Sin eventos, una tarjeta de "muy pronto" y huecos punteados que se irán llenando. */
 .eventos-sec h2{max-width:16ch}
 .eventos-sec .lede{margin-top:16px}
@@ -672,6 +700,8 @@ footer .redes a:hover{background:var(--card);color:var(--ink)}
 footer .redes svg{width:20px;height:20px}
 footer .legal{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between;font-size:13px;color:var(--texto-3)}
 footer .legal nav{display:flex;flex-wrap:wrap;gap:20px}
+footer .legal-izq{display:flex;flex-direction:column;gap:12px}
+footer .legal .hecho{margin:0}
 footer .legal a{color:var(--texto-2)}
 footer .legal p{max-width:60ch}
 footer a{text-decoration:none}
@@ -806,7 +836,7 @@ body.limpio .tbd{background:none}
       <h2 class="reveal">Quedadas online.</h2>
       <p class="lede reveal">Charlas de la comunidad, en directo y en español. Las hacemos en Discord: si te apuntas, te avisamos de cada una.</p>
       <div class="eventos" id="eventos-lista" aria-live="polite">
-        <!-- generado:quedadas · lo escribe scripts/generar.swift desde datos/quedadas.json -->
+        <!-- generado:quedadas · lo escribe swift run generar desde datos/quedadas.json -->
         <article class="evento vacio reveal"><img src="assets/img/glifos/arroba.webp" alt="" aria-hidden="true">
           <h3>Las primeras quedadas, muy pronto.</h3><p>Estamos preparando las primeras charlas. Apúntate y te avisamos de cada una.</p>
           <button class="btn" type="button" data-abre-apunte>Avísame</button></article>
@@ -814,7 +844,7 @@ body.limpio .tbd{background:none}
         <div class="evento hueco reveal" aria-hidden="true">Próxima quedada</div>
         <!-- /generado:quedadas -->
       </div>
-      <!-- generado:quedadas-datos · lo escribe scripts/generar.swift desde datos/quedadas.json -->
+      <!-- generado:quedadas-datos · lo escribe swift run generar desde datos/quedadas.json -->
       <script type="application/json" id="quedadas-datos">
       []
       </script>
@@ -861,7 +891,7 @@ body.limpio .tbd{background:none}
       <div class="grupo-personas">
         <div class="cabeza reveal"><h3 class="etiqueta">Founders</h3><p>Organizan hola Swift y llevan el timón.</p></div>
         <div class="personas founders">
-          <!-- generado:founders · lo escribe scripts/generar.swift desde datos/founders.json -->
+          <!-- generado:founders · lo escribe swift run generar desde datos/founders.json -->
           <article class="persona founder reveal">
             <div class="retrato"><img class="foto" src="assets/equipo/jon-ander-orcera.webp" alt="Jon Ander Orcera" width="800" height="1000" loading="lazy"></div>
             <div class="datos"><div><h3>Jon Ander Orcera</h3><p class="rol">Founder</p></div><p class="redes"><a href="https://www.linkedin.com/in/jonanderorcera" target="_blank" rel="noopener me" aria-label="Jon Ander Orcera en LinkedIn"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3.6 5.6H1V15h2.6V5.6ZM2.3 1.2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM15 9.8c0-2.5-.6-4.4-3.5-4.4-1.4 0-2.3.8-2.7 1.5V5.6H6.3V15h2.6v-4.6c0-1.2.2-2.4 1.8-2.4 1.5 0 1.5 1.4 1.5 2.5V15H15V9.8Z"/></svg></a></p></div>
@@ -878,7 +908,7 @@ body.limpio .tbd{background:none}
       <div class="grupo-personas">
         <div class="cabeza reveal"><h3 class="etiqueta">Embajadores</h3><p>Personas de la comunidad que echan una mano desde el principio.</p></div>
         <div class="personas embajadores-lista">
-          <!-- generado:embajadores · lo escribe scripts/generar.swift desde datos/embajadores.json -->
+          <!-- generado:embajadores · lo escribe swift run generar desde datos/embajadores.json -->
           <article class="persona reveal">
             <div class="retrato"><img class="foto" src="assets/equipo/patricia-bedoya.webp" alt="Patricia Bedoya" width="800" height="1000" loading="lazy"><button class="mas" type="button" aria-expanded="false" aria-controls="bio-0" aria-label="Leer sobre Patricia Bedoya"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div class="bio" id="bio-0"><p>Hace diseño y desarrollo web en Chubby Studio y en FitWoody, y es alumni del Apple Entrepreneur Camp. Ha creado la marca y la web de hola Swift.</p></div></div>
             <div class="datos"><div><h3>Patricia Bedoya</h3><p class="rol">Diseño y desarrollo web · Chubby Studio</p></div><p class="redes"><a href="https://x.com/Patricia_Bedoya" target="_blank" rel="noopener me" aria-label="Patricia Bedoya en X"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M12.2 1.5h2.2L9.6 7l5.6 7.5h-4.4L7.3 10l-4 4.5H1.1L6.2 8.6.8 1.5h4.5l3.1 4.2 3.8-4.2Zm-.8 11.7h1.2L4.7 2.7H3.4l8 10.5Z"/></svg></a><a href="https://www.linkedin.com/in/patriciabedoya/" target="_blank" rel="noopener me" aria-label="Patricia Bedoya en LinkedIn"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M3.6 5.6H1V15h2.6V5.6ZM2.3 1.2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM15 9.8c0-2.5-.6-4.4-3.5-4.4-1.4 0-2.3.8-2.7 1.5V5.6H6.3V15h2.6v-4.6c0-1.2.2-2.4 1.8-2.4 1.5 0 1.5 1.4 1.5 2.5V15H15V9.8Z"/></svg></a><a href="https://chubby.studio" target="_blank" rel="noopener me" aria-label="Patricia Bedoya en su web"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1"/></svg></a></p></div>
@@ -943,7 +973,7 @@ body.limpio .tbd{background:none}
           <button class="btn lg" type="button" data-abre-patro aria-haspopup="dialog">Escríbenos</button>
         </div>
         <div class="muro">
-          <!-- generado:patrocinadores · lo escribe scripts/generar.swift desde datos/patrocinadores.json -->
+          <!-- generado:patrocinadores · lo escribe swift run generar desde datos/patrocinadores.json -->
           <span class="logo-hueco primero" aria-hidden="true">Tu marca aquí</span><span class="logo-hueco" aria-hidden="true"></span><span class="logo-hueco" aria-hidden="true"></span><span class="logo-hueco" aria-hidden="true"></span><span class="logo-hueco" aria-hidden="true"></span><span class="logo-hueco" aria-hidden="true"></span>
           <!-- /generado:patrocinadores -->
           <div class="suelta" style="--r:-12deg;--t:7s" aria-hidden="true"><img src="assets/img/glifos/corazon.webp" alt=""></div>
@@ -992,7 +1022,10 @@ body.limpio .tbd{background:none}
     <p>Web diseñada por <a href="https://chubby.studio" target="_blank" rel="noopener" style="color:var(--ink);text-decoration:underline;text-underline-offset:3px">Chubby Studio</a></p>
   </div>
   <div class="wrap-x legal">
-    <nav aria-label="Legal"><a href="aviso-legal.html">Aviso legal</a><a href="privacidad.html">Privacidad</a><a href="cookies.html">Cookies</a></nav>
+    <div class="legal-izq">
+      <nav aria-label="Legal"><a href="aviso-legal.html">Aviso legal</a><a href="privacidad.html">Privacidad</a><a href="cookies.html">Cookies</a></nav>
+      <p class="hecho">Hecho con Swift</p>
+    </div>
     <p>hola Swift es una comunidad independiente, sin relación oficial con Apple Inc. Swift y Apple son marcas de Apple Inc.</p>
   </div>
 </footer>
@@ -1054,617 +1087,8 @@ body.limpio .tbd{background:none}
 
 
 
-<script>
-// Coreografía tipo mesa de trabajo: cada pieza vive sus fases (vector → malla → render) a destiempo,
-// así que a mitad de animación conviven las tres, como en el "hello" de Apple. Cada cambio remata con un saltito.
-const VIDEO = !!window.VIDEO;   // versión para grabar: el tiempo lo marca la captura, no el reloj
-const reduce = !VIDEO && matchMedia('(prefers-reduced-motion: reduce)').matches;
-const hero = document.getElementById('hero'), stage = document.getElementById('stage');
-const PLAN = {                    // segundos
-  hola:  { draw:[.75,2.0],  mesh:[1.55,2.45], col:[2.6,3.4] },
-  excl:  { pop:1.6, draw:[1.6,1.9], mesh:[2.1,2.3], col:[2.55,2.75] },
-  swift: { draw:[1.95,3.15], mesh:[3.0,3.7],  col:[3.85,4.55] },
-  brace: { pop:2.45, draw:[2.45,2.46], mesh:[2.45,2.5], col:[3.35,3.6] },
-  bang:  { pop:3.2, draw:[3.2,3.5], mesh:[3.95,4.2], col:[4.6,4.85] },   // la ! cierra el saludo cuando Swift ya está en color
-};
-const LEAD = { draw:[0,.85], back:[.95,1.55] }, HAND = { pop:4.15, wave:4.5 }, READY = 5.0;
-
-const clamp=v=>Math.min(1,Math.max(0,v)), prog=(t,[a,b])=>clamp((t-a)/((b-a)||1e-3));
-const sine=x=>-(Math.cos(Math.PI*x)-1)/2, outc=x=>1-Math.pow(1-x,3);
-const spring=x=>x<=0?0:Math.exp(-6.5*x)*Math.sin(15*x);
-const springIn=x=>x<=0?0:1-Math.exp(-6*x)*Math.cos(12*x);
-
-const E = {};
-document.querySelectorAll('.el').forEach(el=>{
-  const k=el.dataset.k, w=[...el.querySelectorAll('.over path')], o=[...el.querySelectorAll('.under path')];
-  const items=w.map((p,i)=>({w:p,o:o[i],L:p.getTotalLength(),anchors:[...el.querySelectorAll(`.nodes[data-i="${i}"] g`)]}));
-  items.forEach(it=>[it.w,it.o].forEach(p=>{ p.style.strokeDasharray=`${it.L} ${it.L}`; }));
-  E[k]={el,items,total:items.reduce((a,b)=>a+b.L,0),vec:el.querySelector('.vec'),mesh:el.querySelector('.mesh'),col:el.querySelector('.col'),dots:[...el.querySelectorAll('circle.dot')]};
-});
-const lead=document.querySelector('.lead path'), mano=document.querySelector('.mano'), copyEl=document.querySelector('.copy');
-
-function draw(e,f){
-  let acc=0, len=f*e.total;
-  e.items.forEach(it=>{ const d=Math.min(it.L,Math.max(0,len-acc)); acc+=it.L;
-    it.w.style.strokeDashoffset=it.o.style.strokeDashoffset=it.L-d;
-    for(const g of it.anchors) g.classList.toggle('on', d>0 && d/it.L >= +g.dataset.f-.02); });   // cada nodo se enciende al pasar la pluma
-  e.dots.forEach(c=>c.style.opacity=f>=1?1:0);
-}
-function frame(t){
-  lead.style.strokeDasharray='1 1';
-  lead.setAttribute('pathLength','1');
-  lead.style.strokeDashoffset = t<LEAD.back[0] ? 1-outc(prog(t,LEAD.draw)) : -sine(prog(t,LEAD.back));
-  for(const [k,p] of Object.entries(PLAN)){
-    const e=E[k], m=prog(t,p.mesh), c=prog(t,p.col);
-    draw(e, sine(prog(t,p.draw)));
-    e.mesh.style.setProperty('--p',sine(m)); e.col.style.setProperty('--p',sine(c));
-    e.vec.style.opacity = m>=1 ? Math.max(0,1-(t-p.mesh[1])/.3) : 1;
-    e.mesh.style.opacity = c>=1 ? Math.max(0,1-(t-p.col[1])/.3) : 1;
-    let s=1+.06*spring(t-p.mesh[1])+.08*spring(t-p.col[1]);
-    if(p.pop!==undefined) s*=springIn(t-p.pop);
-    e.el.style.transform=`scale(${s})`; e.el.style.visibility = s<=0.001?'hidden':'visible';
-  }
-  // la mano entra con un salto y saluda cada pocos segundos, girando desde la muñeca
-  const k=t-HAND.wave, loc=k<0?-1:k%5.5, env=loc>=0&&loc<1.5?Math.sin(Math.PI*loc/1.5):0;
-  mano.style.transform=`scale(${springIn(t-HAND.pop)}) rotate(${(-4+20*env*Math.sin(loc*13)).toFixed(2)}deg)`;
-  hero.style.setProperty('--grid', String(1-clamp((t-3.8)/1.4)*.85));
-  if(t>READY) hero.classList.add('ready');
-  if(VIDEO){ const c=outc(clamp((t-READY)/.7)); copyEl.style.opacity=c; copyEl.style.transform=`translateY(${(1-c)*24}px)`; copyEl.style.filter=`blur(${(1-c)*6}px)`; }
-}
-
-// lupa de edición: solo con ratón y cuando el logo ya está montado
-const BOXES = [{"label": "hola", "x": 276.67662401146924, "y": 329.0400961898879, "w": 2053, "h": 776}, {"label": "¡", "x": 65, "y": 591, "w": 122, "h": 624}, {"label": "{", "x": 177, "y": 1429, "w": 214, "h": 531}, {"label": "Swift", "x": 382, "y": 1137, "w": 2337, "h": 1143}, {"label": "!", "x": 2796, "y": 1322, "w": 144, "h": 604}, {"label": "mano", "x": 2236, "y": 120, "w": 459.90234375, "h": 470}], [CW, CH] = [3005, 2345];
-const lupa = document.getElementById('lupa-c'), sel = document.getElementById('sel');
-const selBox = sel.querySelector('.box'), selH = [...sel.querySelectorAll('.h')], tagR = sel.querySelector('.tag rect'), tagT = sel.querySelector('.tag text');
-let lx=-9999, ly=-9999, lr=0, gx=-9999, gy=-9999, gr=0, picked=null;
-function pick(x, y){
-  let best=null; for(const b of BOXES){ const m=40; if(x>b.x-m&&x<b.x+b.w+m&&y>b.y-m&&y<b.y+b.h+m&&(!best||b.w*b.h<best.w*best.h)) best=b; }
-  return best;
-}
-function drawSel(b, k){
-  const p=10*k, x=b.x-p, y=b.y-p, w=b.w+2*p, h=b.h+2*p, hs=8*k;
-  selBox.setAttribute('x',x); selBox.setAttribute('y',y); selBox.setAttribute('width',w); selBox.setAttribute('height',h);
-  [[x,y],[x+w/2,y],[x+w,y],[x+w,y+h/2],[x+w,y+h],[x+w/2,y+h],[x,y+h],[x,y+h/2]].forEach(([cx,cy],i)=>{
-    const r=selH[i]; r.setAttribute('x',cx-hs/2); r.setAttribute('y',cy-hs/2); r.setAttribute('width',hs); r.setAttribute('height',hs); });
-  tagT.textContent=b.label; tagT.setAttribute('font-size',12*k);
-  const tw=(b.label.length*7.6+16)*k, th=20*k; tagR.setAttribute('x',x); tagR.setAttribute('y',y-th-6*k); tagR.setAttribute('width',tw); tagR.setAttribute('height',th);
-  tagT.setAttribute('x',x+8*k); tagT.setAttribute('y',y-th/2-6*k);
-}
-stage.addEventListener('pointermove', e=>{
-  if(e.pointerType!=='mouse' || !hero.classList.contains('ready')) return;
-  const r=stage.getBoundingClientRect(), k=CW/r.width; gx=(e.clientX-r.left)*k; gy=(e.clientY-r.top)*k; gr=Math.min(150,r.width*.17)*k;
-  if(lx<-9000){ lx=gx; ly=gy; }
-  const b=pick(gx,gy); if(b!==picked){ picked=b; if(b) drawSel(b,k); sel.classList.toggle('on',!!b); }
-});
-stage.addEventListener('pointerleave', ()=>{ gr=0; picked=null; sel.classList.remove('on'); });
-function lupaFrame(){
-  lx+=(gx-lx)*.22; ly+=(gy-ly)*.22; lr+=(gr-lr)*.14;
-  lupa.setAttribute('cx',lx.toFixed(1)); lupa.setAttribute('cy',ly.toFixed(1)); lupa.setAttribute('r',Math.max(0,lr).toFixed(1));
-}
-
-// leve giro con el puntero
-let px=0,py=0,rx=0,ry=0,speed=1,tl=0,prev=performance.now();
-let ultimoMov=-1e9;
-addEventListener('pointermove',e=>{ px=e.clientX/innerWidth-.5; py=e.clientY/innerHeight-.5; ultimoMov=performance.now(); });
-function loop(now){
-  const dt=Math.min(.05,(now-prev)/1000); prev=now;
-  lupaFrame();
-  if(!reduce){ tl+=dt*speed; frame(tl); // el giro solo mientras se mueve el puntero; quieto, vuelve a plano y se quita la transformación para que se pinte nítido
-    const quieto=now-ultimoMov>1200, tx=quieto?0:-py*5, ty=quieto?0:px*7;
-    rx+=(tx-rx)*.06; ry+=(ty-ry)*.06;
-    stage.style.transform=(Math.abs(rx)<.02&&Math.abs(ry)<.02)?'none':`rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`; }
-  requestAnimationFrame(loop);
-}
-if(reduce){ frame(9); mano.style.transform='none'; }
-if(!VIDEO) requestAnimationFrame(loop);
-
-function replay(){ tl=0; hero.classList.remove('ready'); }
-document.getElementById('replay')?.addEventListener('click',()=>{ if(!reduce) replay(); });
-document.querySelectorAll('[data-speed]').forEach(b=>b.addEventListener('click',()=>{ speed=+b.dataset.speed;
-  document.querySelectorAll('[data-speed]').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); replay(); }));
-window.__hero={ seek:t=>{ tl=t; frame(t); }, pause:()=>{ speed=0; } };
-</script>
-<script>
-// ── página de lanzamiento: nav, apuntarse, manifiesto que se enciende y apariciones ──
-(() => {
-  const nav = document.getElementById('top');
-  new IntersectionObserver(([e]) => nav.classList.toggle('solid', !e.isIntersecting), { rootMargin: '-80px 0px 0px 0px' })
-    .observe(document.querySelector('.copy h1'));
-
-  // apuntarse: el envío real depende de la herramienta que elijan (newsletter, Discord…); aquí se valida y se confirma
-  const form = document.getElementById('signup'), note = document.getElementById('signup-note'), email = document.getElementById('email');
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    if (!email.value.trim()) { note.className = 'signup-note err'; note.textContent = 'Escribe tu email para que podamos avisarte.'; email.focus(); return; }
-    if (!email.checkValidity() || !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.value.trim())) { note.className = 'signup-note err'; note.textContent = 'Ese email no parece correcto. Revisa que lleve @ y dominio.'; email.focus(); return; }
-    form.querySelector('button').disabled = true; email.disabled = true;
-    note.className = 'signup-note ok'; note.textContent = '¡Hecho! Te avisamos cuando arranquemos.';
-  });
-  // "Avísame" (barra, encuentro en persona, eventos): hoja para apuntarse con pegatinas detrás, como la de patrocinio
-  (function () {
-    const capa = document.getElementById('apunte'); if (!capa) return;
-    const form = document.getElementById('apunte-form'), ok = capa.querySelector('.patro-ok'), err = document.getElementById('apunte-error');
-    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches; let volver = null;
-    function abrir() {
-      volver = document.activeElement; form.hidden = false; ok.hidden = true; err.textContent = '';
-      capa.hidden = false; document.documentElement.style.overflow = 'hidden';
-      requestAnimationFrame(() => requestAnimationFrame(() => capa.classList.add('abierta')));
-      setTimeout(() => document.getElementById('apunte-email').focus({ preventScroll: true }), quieto ? 0 : 350);
-    }
-    function cerrar() {
-      if (capa.hidden) return;
-      capa.classList.remove('abierta'); document.documentElement.style.overflow = '';
-      setTimeout(() => { capa.hidden = true; }, quieto ? 0 : 400); setTimeout(() => volver?.focus?.({ preventScroll: true }), 0);   // tras quitar el bloqueo de la página
-    }
-    document.addEventListener('click', e => { if (e.target.closest('[data-abre-apunte]')) { e.preventDefault(); abrir(); } });
-    capa.querySelectorAll('.cerrar,[data-cierra-apunte]').forEach(b => b.addEventListener('click', cerrar));
-    capa.addEventListener('click', e => { if (e.target === capa || e.target.classList.contains('patro-fondo')) cerrar(); });
-    addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const v = document.getElementById('apunte-email').value.trim();
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)) { err.textContent = v ? 'Revisa el email: parece que le falta algo.' : 'Escribe tu email para avisarte.'; return document.getElementById('apunte-email').focus(); }
-      if (!document.getElementById('apunte-acepto').checked) { err.textContent = 'Necesitamos que aceptes la política de privacidad.'; return document.getElementById('apunte-acepto').focus(); }
-      err.textContent = ''; form.hidden = true; ok.hidden = false; form.reset(); ok.querySelector('button').focus({ preventScroll: true });
-    });
-  })();
-
-  // manifiesto: la sección queda fija mientras se lee; el arranque se enciende palabra a palabra y los glifos se juntan alrededor del sobre
-  const man = document.getElementById('manifiesto'), big = document.getElementById('manifiesto-txt');
-  const grupo = document.getElementById('grupo'), lede = document.getElementById('manifiesto-lede');
-  big.querySelectorAll('.txt,.ya').forEach(n => { n.innerHTML = n.textContent.split(' ').map(w => `<span class="w">${w}</span>`).join(' '); });
-  const words = [...big.querySelectorAll('.w')], nTxt = big.querySelectorAll('.txt .w').length;
-  const still = matchMedia('(prefers-reduced-motion: reduce), (max-height:520px) and (orientation:landscape)').matches;   // pantallas bajas: sin momento fijo
-  if (still) { man.classList.add('quieto'); words.forEach(w => w.classList.add('on')); grupo.classList.add('junto'); lede.classList.add('in'); }
-  function manifiesto() {
-    if (still) return;
-    const r = man.getBoundingClientRect(), p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)));
-    const lit = Math.round(Math.min(1, Math.max(0, (p - .04) / .5)) * nTxt);   // primera frase: del 4 % al 54 % del recorrido
-    words.forEach((w, i) => w.classList.toggle('on', i < nTxt ? i < lit : p > .62));
-    grupo.classList.toggle('junto', p > .66); lede.classList.toggle('in', p > .74);
-    requestAnimationFrame(manifiesto);
-  }
-  requestAnimationFrame(manifiesto);
-
-  // fondo: los glifos cercanos se mueven más que los lejanos al mover el puntero
-  const flotas = [...document.querySelectorAll('.flota')]; let fx = 0, fy = 0, cx = 0, cy = 0;
-  addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; fx = e.clientX / innerWidth - .5; fy = e.clientY / innerHeight - .5; });
-  (function paralaje() { cx += (fx - cx) * .06; cy += (fy - cy) * .06;
-    if (!still) flotas.forEach(f => { const d = +f.dataset.d; f.style.setProperty('--px', (-cx * d).toFixed(1) + 'px'); f.style.setProperty('--py', (-cy * d).toFixed(1) + 'px'); });
-    requestAnimationFrame(paralaje); })();
-
-  // lupa en todo el hero: esqueleto de los glifos bajo el cursor y selección de cualquier pieza (como en un editor)
-  const heroEl = document.getElementById('hero'), stageEl = document.getElementById('stage'), selDom = document.getElementById('seleccion'), colab = document.getElementById('colab');
-  const ETIQ = { pregunta: '?', llaves: '{ }', abre: '¿', corazon: '♥', arroba: '@', enye: 'ñ' };
-  const flotasEsq = [...document.querySelectorAll('.flota')].map(f => ({ f, svg: f.querySelector('.esq'), label: 'Glifo ' + ETIQ[f.querySelector('.cuerpo').dataset.k] }));
-  const fam = el => { const cs = getComputedStyle(el); return `${cs.fontFamily.split(',')[0].replace(/"/g, '')} ${Math.round(parseFloat(cs.fontSize))}`; };
-  const objetivos = () => [
-    ...flotasEsq.map(o => ({ el: o.f.querySelector('.cuerpo'), label: o.label })),
-    { el: document.querySelector('.copy h1'), label: 'Titular · ' + fam(document.querySelector('.copy h1')) },
-    { el: document.getElementById('email'), label: 'Campo de email' },
-    { el: document.querySelector('#signup .btn'), label: 'Botón · Avísame' },
-  ];
-  let mx = -9999, my = -9999, sx = -9999, sy = -9999, lr = 0, lrT = 0, elegido = null;
-  heroEl.addEventListener('pointermove', e => {
-    if (e.pointerType !== 'mouse' || !heroEl.classList.contains('ready')) return;
-    mx = e.clientX; my = e.clientY; if (sx < -9000) { sx = mx; sy = my; }
-    lrT = Math.min(150, stageEl.getBoundingClientRect().width * .17);
-    const logoSel = document.getElementById('sel').classList.contains('on');
-    let best = null;
-    if (!logoSel) for (const o of objetivos()) { const r = o.el.getBoundingClientRect(), m = 8;
-      if (mx > r.left - m && mx < r.right + m && my > r.top - m && my < r.bottom + m && (!best || r.width * r.height < best.r.width * best.r.height)) best = { ...o, r }; }
-    elegido = best; selDom.classList.toggle('on', !!best); if (best) selDom.querySelector('b').textContent = best.label;
-    // easter egg: solo el corazón lleva el cursor multijugador con la firma de quien lo diseñó
-    const encima = !!best && best.el.dataset.k === 'corazon';
-    colab.style.transform = `translate(${mx - 2}px,${my - 1.5}px)`; colab.classList.toggle('izq', mx + colab.querySelector('span').offsetWidth + 40 > innerWidth); colab.classList.toggle('on', encima); heroEl.classList.toggle('colab-on', encima);
-  });
-  heroEl.addEventListener('pointerleave', () => { lrT = 0; elegido = null; selDom.classList.remove('on'); colab.classList.remove('on'); heroEl.classList.remove('colab-on'); });
-  (function lupaHero() {
-    sx += (mx - sx) * .22; sy += (my - sy) * .22; lr += (lrT - lr) * .14;
-    for (const o of flotasEsq) { if (!o.svg) continue; const r = o.svg.getBoundingClientRect();
-      o.svg.style.setProperty('--lx', (sx - r.left).toFixed(1) + 'px'); o.svg.style.setProperty('--ly', (sy - r.top).toFixed(1) + 'px'); o.svg.style.setProperty('--lr', Math.max(0, lr).toFixed(1) + 'px'); }
-    if (elegido) { const r = elegido.el.getBoundingClientRect(), h = heroEl.getBoundingClientRect(), p = 6;
-      Object.assign(selDom.style, { left: (r.left - h.left - p) + 'px', top: (r.top - h.top - p) + 'px', width: (r.width + 2 * p) + 'px', height: (r.height + 2 * p) + 'px' }); }
-    requestAnimationFrame(lupaHero);
-  })();
-
-
-  // eventos online: salen de datos/quedadas.json, que scripts/generar.swift copia en #quedadas-datos junto con las tarjetas
-  // ya pintadas. Aquí se repintan con la fecha de hoy, para que «El próximo» y «Ya pasó» estén siempre al día
-  const EVENTOS = JSON.parse(document.getElementById('quedadas-datos')?.textContent || '[]');
-  // una quedada pasa a «Ya pasó» al día siguiente (hora de Madrid), no al empezar: todo su día sigue siendo «El próximo»
-  const diaMadrid = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' });   // 2026-10-22: se compara como texto
-  const yaPaso = (fecha, ahora = Date.now()) => diaMadrid.format(new Date(fecha)) < diaMadrid.format(ahora);
-  const PASADAS = 3;   // de las que ya pasaron solo se enseñan las más recientes
-  // cada quedada trae de 1 a 3 charlas; "tipo" solo se pone si es un taller
-  const esTaller = c => c.tipo === 'Taller';
-  const categoria = e => { const t = e.charlas.filter(esTaller).length, n = e.charlas.length - t;
-    const cuenta = (k, uno, varios) => k === 1 ? `1 ${uno}` : `${k} ${varios}`;
-    return !t ? (n === 1 ? 'Charla' : cuenta(n, 'charla', 'charlas')) : !n ? (t === 1 ? 'Taller' : cuenta(t, 'taller', 'talleres'))
-      : `${cuenta(n, 'charla', 'charlas')} y ${cuenta(t, 'taller', 'talleres')}`; };
-  // "Ana, Pol y Asier", con "e" delante de i- e hi- ("Pol e Íñigo", pero "Ana y Hielo"). A mano y no con Intl.ListFormat,
-  // que no lo hace igual en todos los navegadores (Chrome pone "y Íñigo"); es la misma regla que ponentes() en scripts/generar.swift
-  const listaEs = nombres => { if (nombres.length < 2) return nombres.join('');
-    const inicio = nombres.at(-1).toLowerCase().normalize('NFD').replace(/\p{M}/gu, ''), e = /^h?i/.test(inicio) && !/^hi[aeou]/.test(inicio);
-    return nombres.slice(0, -1).join(', ') + (e ? ' e ' : ' y ') + nombres.at(-1); };
-  const ponentes = c => c.ponentes?.length ? listaEs(c.ponentes.map(p => p.nombre)) : 'Ponente por confirmar';
-  // las caras de quien da la charla, en pila: su foto, sus iniciales en gris si no hay foto, o un círculo gris si aún no hay ponente
-  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-  const iniciales = n => { const p = n.trim().split(/\s+/); return (p.length > 1 ? [p[0], p.at(-1)] : p).map(w => [...w][0]).join('').toLocaleUpperCase('es'); };
-  const caras = c => `<span class="caras" aria-hidden="true">${c.ponentes?.length
-    ? c.ponentes.map(p => p.foto ? `<img src="${esc(p.foto)}" alt="" loading="lazy">` : `<i>${esc(iniciales(p.nombre))}</i>`).join('')
-    : '<i></i>'}</span>`;
-  (function () {
-    const lista = document.getElementById('eventos-lista'); if (!lista) return;
-    // #demo destapa la sección presencial (escondida) para revisarla
-    const demo = location.hash === '#demo';
-    const datos = EVENTOS;
-    const ahora = Date.now(), fDia = new Intl.DateTimeFormat('es-ES', { day: 'numeric', timeZone: 'Europe/Madrid' }),
-      fMes = new Intl.DateTimeFormat('es-ES', { month: 'long', timeZone: 'Europe/Madrid' }),   // solo el mes: el día de la semana va en la hoja
-      fHora = new Intl.DateTimeFormat('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Madrid' });
-    const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-    // en orden de fecha: primero las últimas que ya pasaron y luego las que vienen
-    const todas = datos.map(e => ({ ...e, src: e, d: new Date(e.fecha), pasado: yaPaso(e.fecha, ahora) })).sort((a, b) => a.d - b.d);
-    const ev = todas.filter(e => e.pasado).slice(-PASADAS).concat(todas.filter(e => !e.pasado));
-    if (!ev.length) {
-      lista.innerHTML = `<article class="evento vacio reveal"><img src="assets/img/glifos/arroba.webp" alt="" aria-hidden="true">
-        <h3>Las primeras quedadas, muy pronto.</h3><p>Estamos preparando las primeras charlas. Apúntate y te avisamos de cada una.</p>
-        <button class="btn" type="button" data-abre-apunte>Avísame</button></article>` + '<div class="evento hueco reveal" aria-hidden="true">Próxima quedada</div>'.repeat(2);
-    } else {
-      let visto = false;
-      lista.innerHTML = ev.map(e => { const pasado = e.pasado;
-        const prox = !pasado && !visto; if (prox) visto = true;
-        return `<article class="evento reveal${pasado ? ' pasado' : ''}${prox ? ' proximo' : ''}">
-          ${prox ? '<span class="estado">El próximo</span>' : pasado ? '<span class="estado">Ya pasó</span>' : ''}<p class="dia">${fDia.format(e.d)}</p><p class="mes">${fMes.format(e.d)}</p>
-          <h3>${esc(e.titulo)}</h3>
-          <ul class="charlas" style="--caras:${Math.max(1, ...e.charlas.map(c => c.ponentes?.length || 0))}">${e.charlas.map(c => `<li>${caras(c)}<div><b>${esc(c.titulo)}</b><span>${esc(ponentes(c))}</span></div></li>`).join('')}</ul>
-          <span class="donde">${categoria(e) + ' · ' + fHora.format(e.d) + ' (Madrid)' + (pasado ? '' : '<span class="en-discord"> · Discord</span>')}</span>${e.demo ? '<span class="ejemplo">Ejemplo</span>' : ''}
-          <button class="cubre" type="button" data-evento="${EVENTOS.indexOf(e.src)}" aria-haspopup="dialog" aria-label="Ver ${esc(e.titulo)}"></button></article>`; }).join('');
-    }
-  })();
-
-  // barra oscura mientras está encima del manifiesto
-  (function () {
-    const man = document.getElementById('manifiesto'); if (!man) return;
-    const navEl = document.getElementById('top');
-    const tema = document.getElementById('tema');
-    const mira = () => { const r = man.getBoundingClientRect(), h = navEl.offsetHeight, osc = r.top < h * .5 && r.bottom > h * .5; navEl.classList.toggle('oscura', osc);
-      if (tema) tema.content = osc ? '#0C0B0B' : '#F7F7F7'; document.documentElement.style.backgroundColor = osc ? '#0C0B0B' : ''; };   // el color de Safari (barras y la columna del iPhone Duo) sigue a la sección
-    addEventListener('scroll', mira, { passive: true }); addEventListener('resize', mira); mira();
-  })();
-
-  // embajadores: cada visita en un orden distinto, para que nadie salga siempre primero (el HTML queda en el orden del JSON)
-  (function () {
-    const lista = document.querySelector('.embajadores-lista'); if (!lista) return;
-    const personas = [...lista.querySelectorAll(':scope > article.persona')];
-    for (let i = personas.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [personas[i], personas[j]] = [personas[j], personas[i]]; }
-    lista.prepend(...personas);   // el hueco de "Muy pronto" se queda al final
-  })();
-
-  // embajadores: el + (o la foto) abre su hoja de contacto, como la de iOS
-  (function () {
-    const capa = document.getElementById('ficha'); if (!capa) return;
-    const hoja = capa.querySelector('.ficha'), quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const ETQ = { X: 'X', LinkedIn: 'LinkedIn', 'su web': 'Web' };
-    let volver = null;
-    function abrir(p) {
-      volver = document.activeElement;
-      const foto = p.querySelector('.foto');
-      hoja.querySelector('.cara').src = foto ? foto.src : '';
-      hoja.querySelector('.cara').hidden = !foto;
-      hoja.querySelector('h3').textContent = p.querySelector('h3').textContent;
-      hoja.querySelector('.rol').textContent = p.querySelector('.rol').textContent;
-      hoja.querySelector('.bio-txt').textContent = p.querySelector('.bio')?.textContent.trim() || '';
-      hoja.querySelector('.acciones').innerHTML = [...p.querySelectorAll('.redes a')].map(a => {
-        const red = a.getAttribute('aria-label').split(' en ').pop();
-        return `<a href="${a.href}" target="_blank" rel="noopener me">${a.innerHTML}<span>${ETQ[red] || red}</span></a>`; }).join('');
-      capa.hidden = false; document.documentElement.style.overflow = 'hidden';
-      requestAnimationFrame(() => requestAnimationFrame(() => capa.classList.add('abierta')));
-      hoja.querySelector('.cerrar').focus({ preventScroll: true });
-    }
-    function cerrar() {
-      if (capa.hidden) return;
-      capa.classList.remove('abierta'); document.documentElement.style.overflow = '';
-      setTimeout(() => { capa.hidden = true; }, quieto ? 0 : 420);
-      setTimeout(() => volver?.focus?.({ preventScroll: true }), 0);   // tras quitar el bloqueo de la página
-    }
-    document.querySelectorAll('.embajadores-lista .persona').forEach(p => {
-      const b = p.querySelector('.mas'); if (!b) return;
-      b.setAttribute('aria-haspopup', 'dialog'); b.removeAttribute('aria-expanded'); b.removeAttribute('aria-controls');
-      b.addEventListener('click', () => abrir(p));
-      p.querySelector('.retrato').addEventListener('click', e => { if (!e.target.closest('.mas')) abrir(p); });
-    });
-    capa.querySelector('.ficha-fondo').addEventListener('click', cerrar);
-    capa.querySelector('.cerrar').addEventListener('click', cerrar);
-    addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
-  })();
-
-  // patrocinio: "Escríbenos" abre la hoja de contacto (sin envío real todavía: falta conectar el formulario a un servicio)
-  (function () {
-    const capa = document.getElementById('patro'); if (!capa) return;
-    const form = document.getElementById('patro-form'), ok = capa.querySelector('.patro-ok'), err = document.getElementById('patro-error');
-    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches; let volver = null;
-    function abrir() {
-      volver = document.activeElement; form.hidden = false; ok.hidden = true; err.textContent = '';
-      capa.hidden = false; document.documentElement.style.overflow = 'hidden';
-      requestAnimationFrame(() => requestAnimationFrame(() => capa.classList.add('abierta')));
-      setTimeout(() => document.getElementById('patro-nombre').focus({ preventScroll: true }), quieto ? 0 : 350);
-    }
-    function cerrar() {
-      if (capa.hidden) return;
-      capa.classList.remove('abierta'); document.documentElement.style.overflow = '';
-      setTimeout(() => { capa.hidden = true; }, quieto ? 0 : 400); setTimeout(() => volver?.focus?.({ preventScroll: true }), 0);   // tras quitar el bloqueo de la página
-    }
-    document.querySelectorAll('[data-abre-patro]').forEach(b => b.addEventListener('click', abrir));
-    capa.querySelectorAll('.cerrar,[data-cierra-patro]').forEach(b => b.addEventListener('click', cerrar));
-    capa.addEventListener('click', e => { if (e.target === capa || e.target.classList.contains('patro-fondo')) cerrar(); });
-    addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const v = id => document.getElementById(id).value.trim();
-      if (!v('patro-nombre')) { err.textContent = 'Dinos cómo te llamas.'; return document.getElementById('patro-nombre').focus(); }
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v('patro-email'))) { err.textContent = 'Revisa el email: parece que le falta algo.'; return document.getElementById('patro-email').focus(); }
-      if (!v('patro-mensaje')) { err.textContent = 'Cuéntanos un poco en el mensaje.'; return document.getElementById('patro-mensaje').focus(); }
-      if (!document.getElementById('patro-acepto').checked) { err.textContent = 'Necesitamos que aceptes la política de privacidad.'; return document.getElementById('patro-acepto').focus(); }
-      err.textContent = ''; form.hidden = true; ok.hidden = false; form.reset();
-      ok.querySelector('button').focus({ preventScroll: true });
-    });
-  })();
-
-  // eventos: cada tarjeta abre su hoja (como un evento del Calendario de Apple), con apuntarse y "Añadir a Calendario" (.ics)
-  (function () {
-    const capa = document.getElementById('cal'); if (!capa) return;
-    const hoja = capa.querySelector('.cal-hoja'), q = c => hoja.querySelector(c), quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const tz = { timeZone: 'Europe/Madrid' };
-    const fFecha = new Intl.DateTimeFormat('es-ES', { ...tz, weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const fH = new Intl.DateTimeFormat('es-ES', { ...tz, hour: '2-digit', minute: '2-digit' });
-    // en el calendario: 20 min por charla y 15 de bienvenida y preguntas. En la hoja solo se enseña la hora de empezar
-    const finDe = (e, d) => new Date(d.getTime() + (e.charlas.length * 20 + 15) * 6e4);
-    const txt = t => t.replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
-    const ics = (e, d, fin) => { const z = x => x.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-      const desc = e.charlas.map(c => `${esTaller(c) ? 'Taller' : 'Charla'}: ${c.titulo} (${ponentes(c)})`).join('\n') + (e.notas ? '\n\n' + e.notas : '');
-      return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//hola Swift//ES', 'BEGIN:VEVENT',
-        `UID:${z(d)}-holaswift`, `DTSTAMP:${z(new Date())}`, `DTSTART:${z(d)}`, `DTEND:${z(fin)}`, `SUMMARY:${txt('hola Swift: ' + e.titulo)}`,
-        `DESCRIPTION:${txt(desc)}`, 'LOCATION:Discord', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n')); };
-    let volver = null;
-    function abrir(e) {
-      volver = document.activeElement;
-      const d = new Date(e.fecha), fin = finDe(e, d), fecha = fFecha.format(d);
-      q('.cal-tipo').textContent = categoria(e) + (e.demo ? ' · Ejemplo' : '');
-      q('h3').textContent = e.titulo;
-      q('.cal-cuando').innerHTML = `${fecha.charAt(0).toUpperCase() + fecha.slice(1)}<span>${fH.format(d)} (hora de Madrid) · Discord</span>`;
-      q('.cal-charlas').innerHTML = e.charlas.map(c => `<section class="cal-grupo cal-charla"><p class="cal-et">${esTaller(c) ? 'Taller' : 'Charla'}</p>
-        <div class="cal-quienes">${caras(c)}<div><h4>${esc(c.titulo)}</h4><p class="cal-quien">${esc(ponentes(c))}</p></div></div>${c.descripcion ? `<p class="cal-desc">${esc(c.descripcion)}</p>` : ''}</section>`).join('');
-      q('.cal-notas .cal-desc').textContent = e.notas || '';
-      q('.cal-notas').hidden = !e.notas;
-      q('.cal-ics').href = ics(e, d, fin);
-      q('.cal-apuntar').hidden = false; q('.cal-form').hidden = true; q('.cal-ok').hidden = true;
-      const nota = q('.cal-nota'); nota.classList.remove('err'); nota.innerHTML = 'Al apuntarte aceptas la <a href="privacidad.html">política de privacidad</a>.';
-      const pasado = yaPaso(e.fecha); q('.cal-accion').hidden = pasado; hoja.classList.toggle('sin-accion', pasado);   // sin botones, el aire de abajo lo pone la hoja
-      capa.hidden = false; document.documentElement.style.overflow = 'hidden';
-      hoja.scrollTop = 0; tapa();   // cada quedada empieza arriba; con la hoja ya visible se sabe si queda contenido bajo los botones
-      requestAnimationFrame(() => requestAnimationFrame(() => capa.classList.add('abierta')));
-      q('.cal-cerrar').focus({ preventScroll: true });
-    }
-    function cerrar() {
-      if (capa.hidden) return;
-      capa.classList.remove('abierta'); document.documentElement.style.overflow = '';
-      setTimeout(() => { capa.hidden = true; }, quieto ? 0 : 420); setTimeout(() => volver?.focus?.({ preventScroll: true }), 0);   // tras quitar el bloqueo de la página
-    }
-    document.getElementById('eventos-lista')?.addEventListener('click', ev => { const b = ev.target.closest('[data-evento]'); if (b) abrir(EVENTOS[+b.dataset.evento]); });
-    q('.cal-cerrar').addEventListener('click', cerrar);
-    capa.querySelector('.cal-fondo').addEventListener('click', cerrar);
-    addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
-    q('.cal-apuntar').addEventListener('click', () => { q('.cal-apuntar').hidden = true; q('.cal-form').hidden = false; q('#cal-email').focus(); });
-    // desenfoque tras los botones solo mientras queda contenido por debajo; al llegar al final, la barra vuelve a ser transparente
-    const accion = q('.cal-accion'), tapa = () => accion.classList.toggle('tapa', hoja.scrollHeight - hoja.scrollTop - hoja.clientHeight > 1);
-    hoja.addEventListener('scroll', tapa, { passive: true });
-    const ro = new ResizeObserver(tapa); [hoja, accion, q('.cal-charlas')].forEach(el => ro.observe(el));   // al abrir otra quedada o al salir el formulario
-    q('.cal-form').addEventListener('submit', e => {
-      e.preventDefault(); const v = q('#cal-email').value.trim(), nota = q('.cal-nota');
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)) { nota.classList.add('err'); nota.textContent = 'Revisa el email: parece que le falta algo.'; return; }
-      q('.cal-form').hidden = true; q('.cal-ok').hidden = false; q('.cal-form').reset();
-    });
-  })();
-
-  // accesibilidad de las ventanas: cuelgan del body y, abiertas, el resto de la página queda inerte (el foco no se escapa con Tab)
-  ['ficha', 'cal', 'patro', 'apunte'].forEach(id => {
-    const capa = document.getElementById(id); if (!capa) return;
-    document.body.appendChild(capa);
-    new MutationObserver(() => {
-      const abierta = !capa.hidden && capa.classList.contains('abierta');   // al cerrar se quita 'abierta' antes de devolver el foco
-      [...document.body.children].forEach(el => { if (el !== capa && el.tagName !== 'SCRIPT' && el.id !== 'carta') el.inert = abierta; });
-    }).observe(capa, { attributes: true, attributeFilter: ['hidden', 'class'] });
-  });
-
-  // hojas de móvil: se cierran arrastrando hacia abajo desde arriba (asa o cabecera) o con un tirón rápido, como en iOS
-  [['cal', '.cal-hoja', '.cal-cerrar'], ['ficha', '.ficha', '.cerrar']].forEach(([id, sel, btn]) => {
-    const capa = document.getElementById(id); if (!capa) return;
-    const hoja = capa.querySelector(sel); let y0 = null, dy = 0, t0 = 0;
-    const movil = () => matchMedia('(max-width:639px)').matches;
-    hoja.addEventListener('touchstart', e => { if (!movil() || hoja.scrollTop > 0) return; y0 = e.touches[0].clientY; dy = 0; t0 = performance.now(); }, { passive: true });
-    hoja.addEventListener('touchmove', e => {
-      if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0);
-      if (dy > 0) { hoja.classList.add('arrastra'); hoja.style.transform = `translateY(${dy}px)`; capa.querySelector('[class$="fondo"]').style.opacity = String(Math.max(0, 1 - dy / 400)); }
-    }, { passive: true });
-    hoja.addEventListener('touchend', () => {
-      if (y0 === null) return; const v = dy / Math.max(1, performance.now() - t0); y0 = null;
-      hoja.classList.remove('arrastra'); hoja.style.transform = ''; capa.querySelector('[class$="fondo"]').style.opacity = '';
-      if (dy > 110 || (v > .6 && dy > 40)) capa.querySelector(btn).click();   // arrastre largo o tirón rápido; un roce no cierra
-    });
-  });
-
-  // apariciones
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .2 });
-  document.querySelectorAll('.reveal').forEach((el, i) => { el.style.transitionDelay = (el.closest('.agenda,.personas,.eventos') ? (i % 3) * .08 : 0) + 's'; io.observe(el); });
-
-
-
-  // la carta: el sobre se abre sobre la landing (solapa, sello, la carta sale) y queda para leer; Esc o ✕ la cierran
-  (function () {
-    const capa = document.getElementById('carta'); if (!capa) return;
-    const lectura = capa.querySelector('.lectura'), cerrarBtn = capa.querySelector('.cerrar-carta'), firmas = document.getElementById('firmas');
-    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const fuera = () => [...document.body.children].filter(el => el !== capa && el.tagName !== 'SCRIPT');
-    const vuelo = capa.querySelector('.vuelo'), carta = capa.querySelector('.carta'), papel = vuelo.querySelector('.sobre-papel');
-    const sobreSec = document.querySelector('.grupo .sobre');
-    let timers = [], volver = null;
-    const paso = (fn, t) => timers.push(setTimeout(fn, t));
-    function abrir(directo) {
-      if (!capa.hidden) return;
-      volver = document.activeElement; capa.hidden = false; document.documentElement.style.overflow = 'hidden';
-      fuera().forEach(el => el.inert = true);
-      try { history.replaceState(null, '', '#carta'); } catch (e) {}
-      if (directo || quieto) { capa.classList.add('abierta', 'sello', 'solapa', 'sale', 'lee'); cerrarBtn.focus({ preventScroll: true }); return; }
-      // 1 · el sobre despega de la sección y vuela al centro (FLIP desde su sitio)
-      const r = sobreSec?.getBoundingClientRect();
-      if (r && r.width) {
-        const v = vuelo.getBoundingClientRect(), k = r.width / v.width;
-        vuelo.style.transition = 'none'; vuelo.style.opacity = '1';
-        vuelo.style.transform = `translate(${r.left + r.width / 2 - (v.left + v.width / 2)}px,${r.top + r.height / 2 - (v.top + v.height / 2)}px) scale(${k})`;
-        sobreSec.style.visibility = 'hidden';
-        vuelo.offsetWidth;
-        vuelo.style.transition = vuelo.style.transform = vuelo.style.opacity = '';
-      }
-      requestAnimationFrame(() => capa.classList.add('abierta'));
-      paso(() => capa.classList.add('sello'), 700);        // 2 · salta el sello
-      paso(() => capa.classList.add('solapa'), 900);       // 3 · se abre la solapa
-      paso(() => capa.classList.add('sale'), 1350);        // 4 · asoma la carta
-      paso(() => {                                         // 5 · la hoja crece hasta ser la carta
-        const p = papel.getBoundingClientRect();
-        capa.classList.add('lee');
-        const c = carta.getBoundingClientRect(), k = p.width / c.width;
-        carta.classList.add('desde');
-        carta.style.transform = `translate(${p.left - c.left - (c.width * (1 - k)) / 2}px,${p.top - c.top}px) scale(${k})`;
-        carta.offsetWidth;
-        carta.classList.add('crece'); carta.classList.remove('desde'); carta.style.transform = '';
-      }, 2000);
-      paso(() => { carta.classList.remove('crece'); cerrarBtn.focus({ preventScroll: true }); }, 2800);
-    }
-    function cerrar() {
-      if (capa.hidden || capa.classList.contains('cierra')) return;
-      timers.forEach(clearTimeout); timers = [];
-      const fin = () => {
-        capa.hidden = true; capa.classList.remove('lee', 'sale', 'solapa', 'sello', 'abierta', 'cierra');
-        lectura.scrollTop = 0; firmas.classList.remove('in'); carta.classList.remove('crece', 'desde', 'vuelve'); carta.style.transform = '';
-        if (sobreSec) sobreSec.style.visibility = '';
-      };
-      fuera().forEach(el => el.inert = false); document.documentElement.style.overflow = '';
-      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-      setTimeout(() => volver?.focus?.({ preventScroll: true }), 0);   // tras quitar el bloqueo de la página
-      if (quieto) return fin();
-      // la carta se pliega y vuelve a su sobre en la sección; el fondo se aclara a la vez
-      const c = carta.getBoundingClientRect(), r = sobreSec?.getBoundingClientRect();
-      capa.classList.add('cierra');
-      if (r && r.width && r.bottom > 0 && r.top < innerHeight) {
-        const k = r.width / c.width;
-        carta.classList.add('vuelve');
-        carta.style.transform = `translate(${r.left + r.width / 2 - (c.left + c.width / 2)}px,${r.top + r.height * .2 - c.top}px) scale(${k})`;
-      }
-      setTimeout(fin, 520);
-    }
-
-    document.querySelectorAll('[data-abre-carta]').forEach(b => b.addEventListener('click', () => abrir(false)));
-    cerrarBtn.addEventListener('click', cerrar);
-    lectura.addEventListener('click', e => { if (e.target === lectura) cerrar(); });
-    addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
-    // las firmas se escriben cuando llegas al final
-    new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) firmas.classList.add('in'); }), { root: lectura, threshold: .6 }).observe(firmas);
-    if (location.hash === '#carta') abrir(true);
-  })();
-})();
-</script>
-<script>
-/* iPhone Duo: Safari deja una franja de controles a la derecha y solo muestra en ella contenido real del documento.
-   Colgamos una columna del body justo donde acaba la ventana y reconstruimos ahí el fondo de cada sección.
-   En cualquier otro dispositivo no hace nada. */
-(() => {
-  const franja = () => {
-    if (!/iPhone/.test(navigator.userAgent) || navigator.maxTouchPoints < 2) return 0;
-    const g = Math.round(screen.width - innerWidth);
-    return g >= 40 && g <= 200 ? g : 0;
-  };
-  let borde = null, firma = '';
-  const quitar = () => {
-    if (!borde) return;
-    borde.remove(); borde = null; firma = '';
-    document.querySelectorAll('[data-radio-derecho]').forEach(e => { e.style.borderTopRightRadius = ''; delete e.dataset.radioDerecho; });
-    for (const e of [document.documentElement, document.body]) { e.style.touchAction = ''; }
-    document.documentElement.style.overflowX = ''; document.body.style.overflowX = '';
-  };
-  const hacer = () => {
-    const b = franja();
-    if (!b) { quitar(); return; }
-    const W = innerWidth, H = document.documentElement.scrollHeight;
-    const hero = document.getElementById('hero');
-    const secciones = [hero, ...document.querySelectorAll('main > section'), document.querySelector('footer')].filter(Boolean);
-    const rects = secciones.map(e => { const r = e.getBoundingClientRect(); return [Math.round(r.top + scrollY), Math.round(r.height)]; });
-    const rejilla = hero ? getComputedStyle(hero, '::before') : null;
-    const capa = document.querySelector('.capa-carta.abierta, .patro-capa.abierta, .cal-capa.abierta, .ficha-capa.abierta');
-    const velo = capa && capa.querySelector('.capa-fondo, .patro-fondo, .cal-fondo, .ficha-fondo');
-    if (document.documentElement.style.overflowX !== 'hidden' && document.documentElement.style.overflow !== 'hidden') document.documentElement.style.overflowX = 'hidden';
-    const f = [b, W, H, rects.join(';'), rejilla && rejilla.opacity, velo ? 'v' + Math.round(scrollY) : ''].join('|');
-    if (f === firma) return;
-    firma = f;
-    if (!borde) {
-      document.documentElement.style.overflowX = 'hidden';
-      document.body.style.overflowX = 'visible';   /* el body recorta en horizontal: aquí tiene que dejar salir la columna */
-      for (const e of [document.documentElement, document.body]) e.style.touchAction = 'pan-y pinch-zoom';
-      borde = document.createElement('div');
-      borde.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(borde);
-    }
-    borde.style.cssText = `position:absolute;top:0;left:${W}px;width:${b}px;height:${H}px;overflow:clip;pointer-events:none;z-index:0;background:${getComputedStyle(document.body).backgroundColor}`;
-    borde.replaceChildren();
-    secciones.forEach((sec, i) => {
-      const cs = getComputedStyle(sec), [top, alto] = rects[i];
-      const pieza = document.createElement('div');
-      pieza.style.cssText = `position:absolute;left:0;width:100%;top:${top}px;height:${alto}px`;
-      if (cs.backgroundColor !== 'rgba(0, 0, 0, 0)') pieza.style.backgroundColor = cs.backgroundColor;
-      if (cs.backgroundImage !== 'none') pieza.style.backgroundImage = cs.backgroundImage;
-      /* esquina redondeada del manifiesto: la llevamos al borde de la pantalla */
-      const radio = sec.dataset.radioDerecho ?? cs.borderTopRightRadius;
-      if (parseFloat(radio)) { sec.dataset.radioDerecho = radio; sec.style.borderTopRightRadius = '0'; pieza.style.borderTopRightRadius = radio; }
-      if (sec === hero && rejilla) {
-        /* la retícula de puntos sigue en la franja, con la misma fase, opacidad y fundido */
-        const t = parseFloat(rejilla.backgroundSize) || 24;
-        const x0 = (sec.clientWidth - t) / 2;
-        const desfase = (((x0 - W) % t) + t) % t;
-        const r = document.createElement('div');
-        r.style.cssText = `position:absolute;inset:0;background-image:${rejilla.backgroundImage};background-size:${rejilla.backgroundSize};` +
-          `background-position:${desfase}px 0;opacity:${rejilla.opacity};-webkit-mask-image:${rejilla.webkitMaskImage || rejilla.maskImage};mask-image:${rejilla.maskImage}`;
-        pieza.appendChild(r);
-      }
-      borde.appendChild(pieza);
-    });
-    if (velo) {
-      /* la ventana emergente es fija y no llega a la franja: su velo se pinta aquí, a la altura de la pantalla */
-      const v = document.createElement('div');
-      v.style.cssText = `position:absolute;left:0;width:100%;top:${Math.round(scrollY) - 200}px;height:${screen.height + 400}px;z-index:2;background:${getComputedStyle(velo).backgroundColor}`;
-      borde.appendChild(v);
-    }
-  };
-  /* Con una ventana emergente abierta la página se bloquea (overflow:hidden) y Safari pinta la franja y la zona bajo su barra
-     con el fondo del body: le damos el color del velo sobre la sección que queda debajo, y lo devolvemos al cerrar */
-  const rgba = c => (c.match(/[\d.]+/g) || [0, 0, 0, 0]).map(Number);
-  let tintado = false;
-  const tinte = () => {
-    const capa = document.querySelector('.capa-carta.abierta, .patro-capa.abierta, .cal-capa.abierta, .ficha-capa.abierta');
-    const velo = capa && capa.querySelector('.capa-fondo, .patro-fondo, .cal-fondo, .ficha-fondo');
-    if (!velo) { if (tintado) { document.body.style.backgroundColor = ''; tintado = false; } return; }
-    const medio = scrollY + innerHeight / 2;
-    const sec = [...document.querySelectorAll('#hero, main > section, footer')].find(e => { const r = e.getBoundingClientRect(); return r.top + scrollY <= medio && r.bottom + scrollY > medio; });
-    let base = rgba(sec ? getComputedStyle(sec).backgroundColor : '');
-    if (base.length < 4 ? false : base[3] === 0) base = [247, 247, 247, 1];
-    const [r, g, b, a = 1] = rgba(getComputedStyle(velo).backgroundColor);
-    const mezcla = [r, g, b].map((v, i) => Math.round(v * a + base[i] * (1 - a)));
-    document.body.style.backgroundColor = `rgb(${mezcla})`; tintado = true;
-  };
-  addEventListener('load', hacer);
-  addEventListener('resize', () => { firma = ''; hacer(); });
-  setInterval(() => { tinte(); hacer(); }, 200);
-  hacer();
-})();
-</script>
+<!-- hecho en Swift: todo lo que se mueve en esta página lo lleva Swift compilado a WebAssembly (Sources/Web,
+     ./scripts/compilar-web.sh). Esta etiqueta solo lo arranca (el import map y las precargas están en el <head>). Si no carga, la página se ve igual con el HTML y el CSS que trae -->
+<script type="module">import { init } from "./assets/swift/index.js"; init().catch(e => console.warn("hola Swift: Swift no ha podido arrancar", e));</script>
 </body>
 </html>

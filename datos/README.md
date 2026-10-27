@@ -2,7 +2,7 @@
 
 El equipo y las quedadas de la web salen de estos archivos. Para cambiar algo se edita el JSON (no el HTML) y se pasa el generador, que lo escribe en `index.html`:
 
-    swift scripts/generar.swift
+    swift run generar
 
 Solo toca lo que hay entre las marcas `<!-- generado:… -->` y `<!-- /generado:… -->` de `index.html`; el resto de la página no se toca. Antes de escribir nada comprueba los datos y, si algo no cuadra, dice qué y dónde (`embajadores.json #3: falta "bio"`).
 
@@ -98,8 +98,48 @@ Cada quedada tiene su propio título y de 1 a 3 charlas, de 20 minutos como much
 ## Antes de subir un cambio
 
 1. Edita el JSON.
-2. `swift scripts/generar.swift`
-3. Abre `index.html` con doble clic para verlo.
+2. `swift run generar`
+3. Para verlo, sírvelo en local y abre http://localhost:8000:
+
+       python3 -m http.server 8000
+
+   Con doble clic (`file://`) se ve el HTML, pero el navegador no deja arrancar Swift desde un archivo local:
+   las quedadas no se repintan con la fecha de hoy, sus hojas no se abren y los embajadores no se barajan.
 4. Sube el JSON y el `index.html` juntos.
 
-La acción `Comprobar datos` de GitHub pasa `swift scripts/generar.swift --comprobar` en cada push: avisa en rojo si un JSON tiene errores o si se cambió un JSON y no se regeneró `index.html`.
+La acción `Comprobar y publicar` de GitHub pasa `swift run generar --comprobar` en cada push: avisa en rojo si un JSON tiene errores o si se cambió un JSON y no se regeneró `index.html`.
+
+## La web, hecha en Swift
+
+La web es un paquete de Swift (`Package.swift`, en la raíz):
+
+| Carpeta | Qué es |
+|---|---|
+| `Sources/HolaSwift/` | La lógica compartida: los modelos de `datos/`, las tarjetas de quedadas, los ponentes y la hoja de cada quedada. Sin Foundation, para que compile también a WebAssembly. |
+| `Sources/Generar/` | El generador: `swift run generar` escribe el equipo, las quedadas y los patrocinadores en `index.html`. |
+| `Sources/Web/` | Lo que corre en el navegador, compilado a WebAssembly. `main.swift`: repinta las quedadas con la fecha de hoy, rellena su hoja y baraja los embajadores. `Hojas.swift`: las hojas (ficha de embajador, quedada, «Avísame», patrocinio) y sus formularios. `Pagina.swift`: la barra, las apariciones al hacer scroll, el manifiesto, los glifos del fondo y la carta. `Hero.swift`: la construcción del logo, la mano, el giro, las lupas de editor y el cursor del corazón. `Duo.swift`: la columna del iPhone Duo. En `index.html` no queda JavaScript escrito a mano: solo las dos líneas que arrancan Swift. |
+
+Las tarjetas de quedadas salen del mismo código (`HolaSwift`) en el generador y en el navegador, así que siempre son iguales.
+
+Si Swift no arranca (un navegador sin WebAssembly, o la página abierta como archivo), la página se ve igual, con el HTML y el CSS que trae: a los 2,5 s el logo aparece ya construido (a color, con la mano, los glifos y el titular con su formulario) y lo que entra al hacer scroll aparece solo. Lo que no funciona sin Swift son las animaciones, las hojas, los formularios y la carta.
+
+Si cambias algo de `Sources/Web/` o `Sources/HolaSwift/`, vuelve a compilar el WebAssembly (hace falta Docker abierto):
+
+    ./scripts/compilar-web.sh
+
+Se compila con **Embedded Swift**, la versión reducida de Swift: el `.wasm` pesa unos 120 KB (50 KB comprimido) en vez de casi 4 MB. Deja en `assets/swift/` el `Web.wasm` y el JavaScript que lo arranca, que genera JavaScriptKit (no se toca a mano). La acción de GitHub lo compila también en cada push y publica el que acaba de compilar.
+
+### Embedded Swift: lo que no vale en `Sources/Web` ni en `Sources/HolaSwift`
+
+`HolaSwift` también lo compila el navegador, así que sigue las mismas reglas:
+
+- **Sin `Codable`**: el generador lee el JSON con `JSONDecoder` (las conformancias van en `#if !hasFeature(Embedded)`); la página lo lee campo a campo desde JavaScript.
+- **Sin `==` entre `String`**: compara con `mismoTexto(a, b)`, byte a byte. `==` tiene en cuenta Unicode y arrastra unos 700 KB de tablas.
+- **Sin `lowercased()`, `uppercased()` ni recorrer `Character`**: se trabaja con `unicodeScalars` (ver `mayuscula`, `minuscula`, `iniciales`).
+- **Sin key paths** (`\.esTaller`): usa closures (`{ $0.esTaller }`).
+- **Métodos de JavaScript solo sobre objetos**: un texto de JavaScript (por ejemplo, lo que devuelve `toISOString()`) se pasa a `String` con `.string` y se trata en Swift.
+- **Cuidado con `Int(Double)`**: con `NaN` detiene Swift. Usa `numero(_:)`, que devuelve `nil`.
+- **No llames a un método de JavaScript que puede no existir**: llamar a algo que no es una función detiene Swift. Para `closest` usa `masCercano(_:_:)`, y para `focus`, `enfocar(_:)`; los dos lo miran antes.
+- **Guarda los `JSClosure`**: un listener tiene que seguir vivo mientras la página lo pueda llamar. Usa `escuchar(_:_:_:)` o `closure(_:)` (Hojas.swift), que los guardan.
+
+Si algo de esto se cuela, `./scripts/compilar-web.sh` no enlaza (falta un símbolo) o la página da `RuntimeError: unreachable` en la consola; las tarjetas que trae el HTML se quedan como están.

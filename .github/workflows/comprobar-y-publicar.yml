@@ -1,26 +1,37 @@
 name: Comprobar y publicar
 
-# En cada push a main: comprueba datos/ e index.html y, solo si todo está bien, publica la web en GitHub Pages.
-# En los pull requests solo comprueba. Pages tiene que tener "GitHub Actions" como origen (Settings › Pages › Source).
+# En cada push a main: comprueba datos/ e index.html, compila la parte en Swift a WebAssembly y, solo si todo está bien,
+# publica la web en GitHub Pages. En los pull requests solo comprueba y compila.
+# Para publicar, Pages tiene que tener "GitHub Actions" como origen (Settings › Pages › Source).
 on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:   # para volver a publicar a mano desde la pestaña Actions
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   comprobar:
-    runs-on: ubuntu-latest   # trae Swift instalado
+    runs-on: ubuntu-latest
+    container: swift:6.4.1
     steps:
       - uses: actions/checkout@v4
-      - run: swift --version
-      - run: swift scripts/generar.swift --comprobar
+      - run: swift run generar --comprobar
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/compilar-web.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swift-wasm
+          path: assets/swift
 
   publicar:
-    needs: comprobar   # si la comprobación falla, no se publica nada y la web se queda como estaba
+    needs: [comprobar, web]   # si algo falla, no se publica nada y la web se queda como estaba
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -34,8 +45,13 @@ jobs:
       url: ${{ steps.despliegue.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Preparar la web (sin los datos ni el generador, que ya están dentro de index.html)
-        run: rsync -a --exclude '.*' --exclude '_site' --exclude 'datos' --exclude 'scripts' ./ _site/
+      - name: Preparar la web (sin los datos, el código Swift ni los scripts, que ya están dentro de la página)
+        run: rsync -a --exclude '.*' --exclude '_site' --exclude 'datos' --exclude 'scripts' --exclude 'Sources' --exclude 'Package.*' ./ _site/ && rm -rf _site/assets/swift
+      - name: El WebAssembly recién compilado, por si el del repo no estaba al día
+        uses: actions/download-artifact@v4
+        with:
+          name: swift-wasm
+          path: _site/assets/swift
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
