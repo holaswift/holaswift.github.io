@@ -1,0 +1,70 @@
+[
+  {
+    "nombre": "Patricia Bedoya",
+    "rol": "Diseño y desarrollo web · Chubby Studio",
+    "foto": "assets/equipo/patricia-bedoya.webp",
+    "bio": "Hace diseño y desarrollo web en Chubby Studio y en FitWoody, y es alumni del Apple Entrepreneur Camp. Ha creado la marca y la web de hola Swift.",
+    "x": "https://x.com/Patricia_Bedoya",
+    "linkedin": "https://www.linkedin.com/in/patriciabedoya/",
+    "web": "https://chubby.studio"
+  },
+  {
+    "nombre": "Asier G. Morato",
+    "rol": "Producto y desarrollo · Chubby Studio",
+    "foto": "assets/equipo/asier-g-morato.webp",
+    "bio": "Casi acaba siendo arqueólogo, pero cambió de idea al descubrir que no era tan emocionante como en Indiana Jones. Hace producto y desarrollo en Chubby Studio y en FitWoody, y es alumni del Apple Entrepreneur Camp.",
+    "x": "https://x.com/asiergmorato/",
+    "linkedin": "https://www.linkedin.com/in/asiergmorato/",
+    "web": "https://chubby.studio"
+  },
+  {
+    "nombre": "Arturo Rivas Arias",
+    "rol": "Swift Pills · Caffè Swift",
+    "foto": "assets/equipo/arturo-rivas-arias.webp",
+    "bio": "Ingeniero de software especializado en Swift y tecnologías de Apple, con experiencia liderando equipos y formando a otros desarrolladores. Comparte lo que aprende en su blog Swift Pills y en los pódcasts Vidas Digitales y Caffè Swift. Leonés afincado en Madrid.",
+    "x": "https://x.com/arturorivasa",
+    "linkedin": "https://www.linkedin.com/in/arturo-rivas-arias/",
+    "web": "https://arturorivas.com/"
+  },
+  {
+    "nombre": "Luis Escámez Sánchez",
+    "rol": "iOS Engineer · Mondly by Pearson",
+    "foto": "assets/equipo/luis-escamez-sanchez.webp",
+    "bio": "iOS Engineer desde Málaga, ahora en Mondly by Pearson. Le encanta el desarrollo nativo en Apple y probar todo lo que se presenta cada junio. Fuera del código entrena, y de ahí nació FitnessGoals, su app indie de salud y vida activa.",
+    "x": "https://x.com/LuisEscamezDev",
+    "linkedin": "https://www.linkedin.com/in/luisescamsan/",
+    "web": "https://apps.apple.com/es/app/fitnessgoals-salud-y-progreso/id6504627557"
+  },
+  {
+    "nombre": "María Clotilde Soriano",
+    "rol": "Docente · Be Native: Learn Swift",
+    "foto": "assets/equipo/maria-clotilde-soriano.webp",
+    "bio": "De las aulas de primaria a Swift y SwiftUI: sigue enseñando, solo que otra asignatura. Está en YouTube y en Be Native: Learn Swift, una app para aprender Swift.",
+    "linkedin": "https://www.linkedin.com/in/sorianom/"
+  },
+  {
+    "nombre": "Alberto Luis Badía",
+    "rol": "OrthoKit · Evolved Orthodontics",
+    "foto": "assets/equipo/alberto-luis-badia.webp",
+    "bio": "Desarrolla software desde los 12 años, especializado en apps nativas para Apple. Fundador de Evolved Orthodontics y creador de OrthoKit, una app para iPhone, iPad y Mac que usan ortodoncistas de todo el mundo.",
+    "x": "https://x.com/swiftyAlbert",
+    "linkedin": "https://www.linkedin.com/in/swiftyalbert"
+  },
+  {
+    "nombre": "Pol Piella Abadia",
+    "rol": "Indie dev · Anima",
+    "foto": "assets/equipo/pol-piella-abadia.webp",
+    "bio": "Desarrollador indie y cofundador de Anima, un estudio de apps. Ha creado Helm para App Store Connect, NowPlaying y Gigs: Concert Tracker, apps rápidas y cuidadas al detalle. Fuera del código pincha música y colecciona vinilos y camisetas de fútbol de equipos de todo el mundo.",
+    "x": "https://x.com/polpielladev",
+    "linkedin": "https://www.linkedin.com/in/polpielladev"
+  },
+  {
+    "nombre": "Julio César Fernández Muñoz",
+    "rol": "Evangelista · Apple Coding Academy",
+    "foto": "assets/equipo/julio-cesar-fernandez-munoz.webp",
+    "bio": "Apple Technical Partner y evangelista en desarrollo Apple e IA. Ayuda a empresas y desarrolladores a especializarse en Swift y en todas las plataformas de Apple, de iOS a visionOS. Es autor del libro «Aprendiendo Swift» y lo tiene claro: programar es entender el código.",
+    "x": "https://x.com/jcfmunoz",
+    "linkedin": "https://www.linkedin.com/in/jcfmunoz/",
+    "web": "https://acoding.academy"
+  }
+]

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aviso legal · hola Swift</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="assets/fuentes/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fuentes/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/img/logo-horizontal-color.webp" as="image">
+<style>
+@font-face{font-family:"Inter";src:url(assets/fuentes/inter-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Inter";src:url(assets/fuentes/inter-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Inter Display";src:url(assets/fuentes/inter-display-700.woff2) format("woff2");font-weight:700;font-display:swap}
+/* tokens del libro de marca hola Swift */
+:root{--fondo:#F7F7F7;--superficie:#FFFFFF;--linea:#E3E3E8;--texto:#111111;--texto-2:#55555F;--texto-3:#6E6E78;--enlace:#0066CC;--interfaz:#007AFF;
+  --f-titulos:"Inter Display","Inter",system-ui,sans-serif;--f-texto:"Inter",system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);font:17px/1.65 var(--f-texto);-webkit-font-smoothing:antialiased}
+a{color:var(--enlace);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--interfaz);outline-offset:3px;border-radius:6px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;width:min(760px,100% - 32px);margin:0 auto;padding:20px 0}
+header img{height:32px;width:auto;display:block}
+header a.volver{font-size:14px;color:var(--texto-2);text-decoration:none}
+header a.volver:hover{color:var(--texto)}
+main{width:min(760px,100% - 32px);margin:24px auto 0;background:var(--superficie);border-radius:28px;padding:clamp(28px,6vw,64px)}
+h1{font:700 clamp(34px,5vw,44px)/1.08 var(--f-titulos);letter-spacing:-.03em;margin:0}
+.fecha{margin:12px 0 0;color:var(--texto-3);font-size:14px}
+h2{font:700 22px/1.25 var(--f-titulos);letter-spacing:-.015em;margin:2em 0 0}
+p,ul{margin:.8em 0 0;color:#2B2B31}
+ul{padding-left:1.2em}
+li+li{margin-top:.35em}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 20px;margin:1em 0 0}
+dt{color:var(--texto-3)}
+dd{margin:0}
+/* datos que faltan: hola Swift tiene que darlos antes de publicar */
+.falta{border:1px dashed #A5A5AF;border-radius:6px;padding:0 6px;color:var(--texto-2);white-space:nowrap}
+footer{width:min(760px,100% - 32px);margin:0 auto;padding:32px 0 56px;display:flex;flex-wrap:wrap;gap:12px 24px;font-size:14px;color:var(--texto-3)}
+footer a{color:var(--texto-2);text-decoration:none}
+footer a:hover,footer a[aria-current]{color:var(--texto)}
+@media (max-width:560px){dl{grid-template-columns:1fr;gap:0}dd{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" aria-label="hola Swift, inicio"><img src="assets/img/logo-horizontal-color.webp" alt="hola Swift" width="115" height="32"></a>
+  <a class="volver" href="index.html">← Volver a hola Swift</a>
+</header>
+<main>
+<h1>Aviso legal</h1>
+<p class="fecha">Última actualización: 15 de octubre de 2026</p>
+
+<h2>Quién está detrás de esta web</h2>
+<p>En cumplimiento de la Ley 34/2002, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), estos son los datos del titular de hola Swift:</p>
+<dl>
+  <dt>Titular</dt><dd><span class="falta">Nombre de la persona o asociación</span></dd>
+  <dt>NIF</dt><dd><span class="falta">NIF / CIF</span></dd>
+  <dt>Domicilio</dt><dd><span class="falta">Dirección postal</span></dd>
+  <dt>Email</dt><dd><span class="falta">hola@dominio</span></dd>
+  <dt>Registro</dt><dd><span class="falta">Inscripción en el registro de asociaciones, si aplica</span></dd>
+</dl>
+
+<h2>Qué es hola Swift</h2>
+<p>hola Swift es una comunidad independiente de personas que desarrollan con Swift y las plataformas de Apple en español. Esta web informa sobre la comunidad, sus quedadas online y sus eventos, y permite apuntarse para recibir avisos.</p>
+<p>hola Swift no tiene relación oficial con Apple Inc. Swift, Apple, iPhone, SwiftUI y el resto de nombres de productos de Apple son marcas de Apple Inc., registradas en EE. UU. y otros países.</p>
+
+<h2>Condiciones de uso</h2>
+<p>Al usar esta web aceptas utilizarla de forma lícita y respetuosa. No está permitido usarla para dañar la web, a otras personas o a la comunidad.</p>
+<p>En los espacios de la comunidad (por ejemplo, Discord) se aplica además su código de conducta.</p>
+
+<h2>Propiedad intelectual</h2>
+<p>El logotipo de hola Swift, las ilustraciones, los textos y el diseño de esta web pertenecen a hola Swift o a sus autores, y no se pueden reproducir con fines comerciales sin permiso. Diseño de marca y web: Chubby Studio.</p>
+<p>Las charlas y talleres pertenecen a quienes los imparten, salvo que se indique otra cosa.</p>
+
+<h2>Responsabilidad</h2>
+<p>Intentamos que la información de esta web sea correcta y esté al día, pero las fechas y los contenidos de los eventos pueden cambiar. No nos hacemos responsables del contenido de las webs externas a las que enlazamos.</p>
+
+<h2>Ley aplicable</h2>
+<p>Este aviso legal se rige por la legislación española. Para cualquier conflicto, las partes se someten a los juzgados y tribunales que correspondan según la ley.</p>
+</main>
+<footer>
+  <a href="aviso-legal.html" aria-current="page">Aviso legal</a>
+  <a href="privacidad.html">Privacidad</a>
+  <a href="cookies.html">Cookies</a>
+</footer>
+</body>
+</html>

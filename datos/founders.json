@@ -1,0 +1,17 @@
+[
+  {
+    "nombre": "Jon Ander Orcera",
+    "rol": "Founder",
+    "foto": "assets/equipo/jon-ander-orcera.webp",
+    "bio": "Project Manager de Apple Coding Academy desde hace seis años, con el desarrollo nativo por bandera. Conecta talento, ideas y oportunidades dentro del ecosistema Apple. Funda hola Swift porque cree que las grandes ideas nacen de personas, pero crecen cuando las personas se unen.",
+    "linkedin": "https://www.linkedin.com/in/jonanderorcera"
+  },
+  {
+    "nombre": "Alejandro Mohamad",
+    "rol": "Founder",
+    "foto": "assets/equipo/alejandro-mohamad.webp",
+    "bio": "Desarrollador de apps para plataformas Apple desde 2014. Apasionado por Swift, SwiftUI y Swift Playgrounds, la educación y la creatividad. Cree en aprender compartiendo, y de esa idea nació hola Swift.",
+    "x": "https://x.com/alemohamad",
+    "linkedin": "https://www.linkedin.com/in/alemohamad/"
+  }
+]

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Política de cookies · hola Swift</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="preload" href="assets/fuentes/inter-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fuentes/inter-display-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/img/logo-horizontal-color.webp" as="image">
+<style>
+@font-face{font-family:"Inter";src:url(assets/fuentes/inter-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Inter";src:url(assets/fuentes/inter-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Inter Display";src:url(assets/fuentes/inter-display-700.woff2) format("woff2");font-weight:700;font-display:swap}
+/* tokens del libro de marca hola Swift */
+:root{--fondo:#F7F7F7;--superficie:#FFFFFF;--linea:#E3E3E8;--texto:#111111;--texto-2:#55555F;--texto-3:#6E6E78;--enlace:#0066CC;--interfaz:#007AFF;
+  --f-titulos:"Inter Display","Inter",system-ui,sans-serif;--f-texto:"Inter",system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--texto);font:17px/1.65 var(--f-texto);-webkit-font-smoothing:antialiased}
+a{color:var(--enlace);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--interfaz);outline-offset:3px;border-radius:6px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;width:min(760px,100% - 32px);margin:0 auto;padding:20px 0}
+header img{height:32px;width:auto;display:block}
+header a.volver{font-size:14px;color:var(--texto-2);text-decoration:none}
+header a.volver:hover{color:var(--texto)}
+main{width:min(760px,100% - 32px);margin:24px auto 0;background:var(--superficie);border-radius:28px;padding:clamp(28px,6vw,64px)}
+h1{font:700 clamp(34px,5vw,44px)/1.08 var(--f-titulos);letter-spacing:-.03em;margin:0}
+.fecha{margin:12px 0 0;color:var(--texto-3);font-size:14px}
+h2{font:700 22px/1.25 var(--f-titulos);letter-spacing:-.015em;margin:2em 0 0}
+p,ul{margin:.8em 0 0;color:#2B2B31}
+ul{padding-left:1.2em}
+li+li{margin-top:.35em}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 20px;margin:1em 0 0}
+dt{color:var(--texto-3)}
+dd{margin:0}
+/* datos que faltan: hola Swift tiene que darlos antes de publicar */
+.falta{border:1px dashed #A5A5AF;border-radius:6px;padding:0 6px;color:var(--texto-2);white-space:nowrap}
+footer{width:min(760px,100% - 32px);margin:0 auto;padding:32px 0 56px;display:flex;flex-wrap:wrap;gap:12px 24px;font-size:14px;color:var(--texto-3)}
+footer a{color:var(--texto-2);text-decoration:none}
+footer a:hover,footer a[aria-current]{color:var(--texto)}
+@media (max-width:560px){dl{grid-template-columns:1fr;gap:0}dd{margin-bottom:10px}}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" aria-label="hola Swift, inicio"><img src="assets/img/logo-horizontal-color.webp" alt="hola Swift" width="115" height="32"></a>
+  <a class="volver" href="index.html">← Volver a hola Swift</a>
+</header>
+<main>
+<h1>Política de cookies</h1>
+<p class="fecha">Última actualización: 15 de octubre de 2026</p>
+
+<h2>Esta web no usa cookies</h2>
+<p>Ahora mismo hola Swift no instala cookies en tu navegador: ni de análisis, ni de publicidad, ni de redes sociales. Por eso no te mostramos ningún aviso para aceptarlas.</p>
+<p>Las tipografías y las imágenes van dentro de la propia web, así que tu navegador tampoco se conecta a servicios de terceros (como Google Fonts) al visitarla.</p>
+
+<h2>Si esto cambia</h2>
+<p>Si en el futuro añadimos cookies que no sean técnicas (por ejemplo, para medir visitas), actualizaremos esta página y te pediremos permiso antes de usarlas.</p>
+
+<h2>Cómo gestionar las cookies</h2>
+<p>Puedes ver y borrar las cookies desde la configuración de tu navegador: <a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" rel="noopener">Safari</a>, <a href="https://support.google.com/chrome/answer/95647?hl=es" rel="noopener">Chrome</a>, <a href="https://support.mozilla.org/es/kb/Borrar%20cookies" rel="noopener">Firefox</a>.</p>
+
+<h2>Contacto</h2>
+<p>Si tienes dudas, escríbenos a <span class="falta">hola@dominio</span>.</p>
+</main>
+<footer>
+  <a href="aviso-legal.html">Aviso legal</a>
+  <a href="privacidad.html">Privacidad</a>
+  <a href="cookies.html" aria-current="page">Cookies</a>
+</footer>
+</body>
+</html>

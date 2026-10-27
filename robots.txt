@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://holaswift.github.io/sitemap.xml
