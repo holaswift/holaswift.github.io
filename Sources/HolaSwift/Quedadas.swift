@@ -89,7 +89,7 @@ public func caras(_ c: Charla) -> String {
     return #"<span class="caras" aria-hidden="true">"# + dentro + "</span>"
 }
 
-/// Una quedada pasa a «Ya pasó» al día siguiente (hora de Madrid), no al empezar: todo su día sigue siendo «El próximo».
+/// Una quedada pasa a «Ya pasó» al día siguiente (hora de España), no al empezar: todo su día sigue siendo «El próximo».
 public func yaPaso(_ m: Momento, hoy: Momento) -> Bool { m.diaNumero < hoy.diaNumero }
 
 /// `momentos[i]` es la fecha de `quedadas[i]`, y `data-evento` guarda ese índice para abrir su hoja.
@@ -111,7 +111,7 @@ public func tarjetas(_ quedadas: [Quedada], momentos: [Momento], hoy: Momento) -
         let proximo = !pasado && !visto
         if proximo { visto = true }
         let clases = "evento reveal" + (pasado ? " pasado" : "") + (proximo ? " proximo" : "")
-        let donde = categoria(q) + " · " + m.horaMinuto + " (Madrid)" + (pasado ? "" : #"<span class="en-discord"> · Discord</span>"#)
+        let donde = categoria(q) + " · " + m.horaMinuto + " (España)" + (pasado ? "" : #"<span class="en-discord"> · Discord</span>"#)
         let estado = proximo ? #"<span class="estado">El próximo</span>"# : pasado ? #"<span class="estado">Ya pasó</span>"# : ""
         let charlas = q.charlas.map { c in "<li>" + caras(c) + "<div><b>" + esc(c.titulo) + "</b><span>" + esc(ponentes(c)) + "</span></div></li>" }.joined()
         let anchoCaras = max(1, q.charlas.map { $0.ponentes?.count ?? 0 }.max() ?? 0)

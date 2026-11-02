@@ -126,12 +126,13 @@ func abrirHoja(_ i: Int) {
     let fecha = JSValue.object(fechaLarga).format(m.ms).string ?? ""
     var en = buscar(".cal-tipo", en: hoja); en.textContent = .string(categoria(q) + (q.demo == true ? " · Ejemplo" : ""))
     en = buscar("h3", en: hoja); en.textContent = .string(q.titulo)
-    en = buscar(".cal-cuando", en: hoja); en.innerHTML = .string(mayusculaInicial(fecha) + "<span>" + m.horaMinuto + " (hora de Madrid) · Discord</span>")
+    en = buscar(".cal-cuando", en: hoja); en.innerHTML = .string(mayusculaInicial(fecha) + "<span>" + m.horaMinuto + " (hora de España) · Discord</span>")
     en = buscar(".cal-charlas", en: hoja); en.innerHTML = .string(charlasHoja(q))
     en = buscar(".cal-notas .cal-desc", en: hoja); en.textContent = .string(q.notas ?? "")
     en = buscar(".cal-notas", en: hoja); en.hidden = .boolean(q.notas == nil)
     en = buscar(".cal-ics", en: hoja); en.href = .string(calendario(q, m))
     en = buscar(".cal-accion", en: hoja); en.hidden = .boolean(pasado)
+    origenQuedada = "quedada-\(m.anio)-" + (m.mes < 10 ? "0" : "") + "\(m.mes)"
     _ = hoja.classList.toggle("sin-accion", pasado)
     mostrarQuedada()
 }

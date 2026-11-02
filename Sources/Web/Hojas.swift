@@ -191,6 +191,8 @@ func trasUltimo(_ separador: String, _ t: String) -> String {
 }
 
 var hojaQuedada: Hoja? = nil
+/// De qué quedada viene quien se apunta desde su hoja (`quedada-2027-01`). Lo pone abrirHoja.
+var origenQuedada = "quedada"
 
 func prepararQuedada() {
     guard let hoja = Hoja("cal", msCerrar: 420) else { return }
@@ -212,10 +214,17 @@ func prepararQuedada() {
     }
     escuchar(formulario, "submit") { e in
         _ = e.preventDefault()
-        guard esEmail(valor(buscar("#cal-email", en: panel))) else {
+        let email = valor(buscar("#cal-email", en: panel)), boton = buscar("button", en: formulario)
+        guard esEmail(email) else {
             _ = nota.classList.add("err"); nota.textContent = "Revisa el email: parece que le falta algo."; return
         }
-        formulario.hidden = .boolean(true); buscar(".cal-ok", en: panel).hidden = .boolean(false); _ = formulario.reset()
+        boton.disabled = .boolean(true)
+        apuntar(email, origen: origenQuedada, trampa: trampa(en: formulario)) { bien in
+            boton.disabled = .boolean(false)
+            guard bien else { _ = nota.classList.add("err"); nota.textContent = .string(sinConexion); return }
+            _ = nota.classList.remove("err")
+            formulario.hidden = .boolean(true); buscar(".cal-ok", en: panel).hidden = .boolean(false); _ = formulario.reset()
+        }
     }
     arrastrarParaCerrar(hoja, panel: ".cal-hoja", cerrar: ".cal-cerrar")
 }
@@ -227,14 +236,16 @@ func mostrarQuedada() {
     buscar(".cal-form", en: panel).hidden = .boolean(true)
     buscar(".cal-ok", en: panel).hidden = .boolean(true)
     _ = nota.classList.remove("err")
-    nota.innerHTML = #"Al apuntarte aceptas la <a href="privacidad.html">política de privacidad</a>."#
+    nota.innerHTML = #"Al apuntarte aceptas la <a href="/privacidad">política de privacidad</a>."#
     hoja.mostrar(foco: buscar(".cal-cerrar", en: panel))
     panel.scrollTop = .number(0)
     let queda = (panel.scrollHeight.number ?? 0) - (panel.clientHeight.number ?? 0)
     _ = buscar(".cal-accion", en: panel).classList.toggle("tapa", queda > 1)
 }
 
+/// `enviar`, si lo hay, manda el formulario y llama a su argumento con true si ha ido bien; sin él, se da por enviado.
 func prepararFormulario(_ id: String, abre selector: String, delegado: Bool, primerCampo: String,
+                        enviar: ((@escaping (Bool) -> Void) -> Void)? = nil, siFalla: String = sinConexion,
                         validar: @escaping () -> (mensaje: String, campo: String)?) {
     guard let hoja = Hoja(id, msCerrar: 400) else { return }
     hojas.append(hoja)
@@ -259,13 +270,24 @@ func prepararFormulario(_ id: String, abre selector: String, delegado: Bool, pri
             enfocar(porId(fallo.campo), desplazar: true)
             return
         }
-        error.textContent = ""; formulario.hidden = .boolean(true); gracias.hidden = .boolean(false); _ = formulario.reset()
-        enfocar(buscar("button", en: gracias))
+        error.textContent = ""
+        func hecho() {
+            formulario.hidden = .boolean(true); gracias.hidden = .boolean(false); _ = formulario.reset()
+            enfocar(buscar("button", en: gracias))
+        }
+        guard let enviar = enviar else { hecho(); return }
+        let boton = buscar("[type=submit]", en: formulario)
+        boton.disabled = .boolean(true)
+        enviar { bien in
+            boton.disabled = .boolean(false)
+            if bien { hecho() } else { error.textContent = .string(siFalla) }
+        }
     }
 }
 
 func prepararAvisame() {
-    prepararFormulario("apunte", abre: "[data-abre-apunte]", delegado: true, primerCampo: "apunte-email") {
+    prepararFormulario("apunte", abre: "[data-abre-apunte]", delegado: true, primerCampo: "apunte-email",
+                       enviar: { listo in apuntar(valor(porId("apunte-email")), origen: "avisame", trampa: trampa(en: porId("apunte-form")), listo: listo) }) {
         let email = valor(porId("apunte-email"))
         if !esEmail(email) { return (email.isEmpty ? "Escribe tu email para avisarte." : "Revisa el email: parece que le falta algo.", "apunte-email") }
         if porId("apunte-acepto").checked.boolean != true { return ("Necesitamos que aceptes la política de privacidad.", "apunte-acepto") }
@@ -274,7 +296,13 @@ func prepararAvisame() {
 }
 
 func prepararPatrocinio() {
-    prepararFormulario("patro", abre: "[data-abre-patro]", delegado: false, primerCampo: "patro-nombre") {
+    prepararFormulario("patro", abre: "[data-abre-patro]", delegado: false, primerCampo: "patro-nombre",
+                       enviar: { listo in
+                           enviarPatrocinio(nombre: valor(porId("patro-nombre")), empresa: valor(porId("patro-empresa")),
+                                            email: valor(porId("patro-email")), mensaje: valor(porId("patro-mensaje")),
+                                            trampa: trampa(en: porId("patro-form")), listo: listo)
+                       },
+                       siFalla: "No hemos podido enviar tu mensaje. Inténtalo de nuevo o escríbenos a patrocinio@holaswift.com.") {
         if valor(porId("patro-nombre")).isEmpty { return ("Dinos cómo te llamas.", "patro-nombre") }
         if !esEmail(valor(porId("patro-email"))) { return ("Revisa el email: parece que le falta algo.", "patro-email") }
         if valor(porId("patro-mensaje")).isEmpty { return ("Cuéntanos un poco en el mensaje.", "patro-mensaje") }
@@ -283,7 +311,7 @@ func prepararPatrocinio() {
     }
 }
 
-/// El formulario del principio de la página: valida y confirma (el envío real depende de la herramienta que elijan).
+/// El formulario del principio de la página: valida y apunta el email a la lista de correo.
 func prepararApuntarse() {
     let formulario = porId("signup"), nota = porId("signup-note"), email = porId("email")
     escuchar(formulario, "submit") { e in
@@ -295,8 +323,17 @@ func prepararApuntarse() {
         if email.checkValidity().boolean != true || !esEmail(texto) {
             nota.className = "signup-note err"; nota.textContent = "Ese email no parece correcto. Revisa que lleve @ y dominio."; enfocar(email, desplazar: true); return
         }
-        buscar("button", en: formulario).disabled = .boolean(true); email.disabled = .boolean(true)
-        nota.className = "signup-note ok"; nota.textContent = "¡Hecho! Te avisamos cuando arranquemos."
+        let boton = buscar("button", en: formulario)
+        boton.disabled = .boolean(true); email.disabled = .boolean(true)
+        apuntar(texto, origen: "web", trampa: trampa(en: formulario)) { bien in
+            boton.disabled = .boolean(false); email.disabled = .boolean(false)
+            if bien {
+                _ = formulario.reset()   // vacío: así se ve que ya se ha enviado
+                nota.className = "signup-note ok"; nota.textContent = "¡Casi! Revisa tu correo y confirma tu email."
+            } else {
+                nota.className = "signup-note err"; nota.textContent = .string(sinConexion)
+            }
+        }
     }
 }
 

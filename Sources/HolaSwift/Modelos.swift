@@ -49,11 +49,11 @@ extension Ponente: Decodable {}
 extension Patrocinador: Decodable {}
 #endif
 
-/// Un instante con sus partes ya en hora de Madrid. Lo calcula quien tenga reloj: el generador con Foundation
+/// Un instante con sus partes ya en hora de España (Europe/Madrid). Lo calcula quien tenga reloj: el generador con Foundation
 /// y la página con Intl. Así la lógica de aquí no necesita Foundation y vale igual en los dos sitios.
 public struct Momento {
     public let ms: Double
-    public let anio, mes, dia, hora, minuto: Int       // en Madrid
+    public let anio, mes, dia, hora, minuto: Int       // en hora de España
 
     public init(ms: Double, anio: Int, mes: Int, dia: Int, hora: Int, minuto: Int) {
         self.ms = ms; self.anio = anio; self.mes = mes; self.dia = dia; self.hora = hora; self.minuto = minuto

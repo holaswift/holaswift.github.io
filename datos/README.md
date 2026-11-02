@@ -67,7 +67,7 @@ Cada quedada tiene su propio título y de 1 a 3 charlas, de 20 minutos como much
 ```
 
 - **Quedada:** `fecha`, `titulo` y `charlas` son obligatorios; `notas` (para toda la quedada), `enlace` y `demo` son opcionales.
-- La fecha va con zona horaria: `+01:00` en invierno y `+02:00` en verano (hora de Madrid). En la web solo se enseña la hora de empezar.
+- La fecha va con zona horaria: `+01:00` en invierno y `+02:00` en verano (hora de España peninsular). En la web solo se enseña la hora de empezar.
 - **Charla:** `titulo` es obligatorio. `ponentes` es una lista de hasta 3 personas; vacía o sin poner, sale «Ponente por confirmar» con un círculo gris. `descripcion` es opcional.
 - **Ponente:** `nombre` es obligatorio y `foto` opcional. Las fotos salen en círculos apilados a la izquierda de la charla; sin foto, sale un círculo gris con sus iniciales.
 - Las fotos de ponentes van en `assets/ponentes/`: cuadradas, en WebP, de 200 × 200 y con el nombre en minúsculas y guiones (`lucia-gomez.webp`). Para quien ya está en el equipo se puede usar su foto de `assets/equipo/`.
@@ -75,7 +75,7 @@ Cada quedada tiene su propio título y de 1 a 3 charlas, de 20 minutos como much
 - La pastilla de la tarjeta lo resume sola: «Charla», «3 charlas», «Taller» o «2 charlas y 1 taller».
 - En «Añadir a Calendario» la quedada dura 20 minutos por charla y 15 más de bienvenida y preguntas.
 - `demo: true` pinta la etiqueta «Ejemplo» en la tarjeta.
-- Una quedada es «El próximo» durante todo su día (hora de Madrid), aunque ya haya empezado, y pasa a «Ya pasó» al día siguiente.
+- Una quedada es «El próximo» durante todo su día (hora de España), aunque ya haya empezado, y pasa a «Ya pasó» al día siguiente.
 - Salen en orden de fecha: primero las 3 últimas que ya pasaron (con borde oscuro) y luego las que vienen. Las más antiguas se pueden quedar en el JSON: no se enseñan.
 - Si el archivo está vacío (`[]`), sale la tarjeta de «Las primeras quedadas, muy pronto».
 - «El próximo» y «Ya pasó» se calculan al generar, pero la página los vuelve a calcular al cargar con la fecha del día: no hace falta regenerar cuando pasa una quedada.
@@ -97,17 +97,17 @@ Cada quedada tiene su propio título y de 1 a 3 charlas, de 20 minutos como much
 
 ## Antes de subir un cambio
 
-1. Edita el JSON.
+1. Editad el JSON.
 2. `swift run generar`
-3. Para verlo, sírvelo en local y abre http://localhost:8000:
+3. Para verlo, servidlo en local y abrid http://localhost:8000:
 
        python3 -m http.server 8000
 
    Con doble clic (`file://`) se ve el HTML, pero el navegador no deja arrancar Swift desde un archivo local:
    las quedadas no se repintan con la fecha de hoy, sus hojas no se abren y los embajadores no se barajan.
-4. Sube el JSON y el `index.html` juntos.
+4. Subid el JSON y el `index.html` juntos.
 
-La acción `Comprobar y publicar` de GitHub pasa `swift run generar --comprobar` en cada push: avisa en rojo si un JSON tiene errores o si se cambió un JSON y no se regeneró `index.html`.
+La acción `Comprobar` de GitHub pasa `swift run generar --comprobar` en cada push: avisa en rojo si un JSON tiene errores o si se cambió un JSON y no se regeneró `index.html`.
 
 ## La web, hecha en Swift
 
@@ -123,23 +123,23 @@ Las tarjetas de quedadas salen del mismo código (`HolaSwift`) en el generador y
 
 Si Swift no arranca (un navegador sin WebAssembly, o la página abierta como archivo), la página se ve igual, con el HTML y el CSS que trae: a los 2,5 s el logo aparece ya construido (a color, con la mano, los glifos y el titular con su formulario) y lo que entra al hacer scroll aparece solo. Lo que no funciona sin Swift son las animaciones, las hojas, los formularios y la carta.
 
-Si cambias algo de `Sources/Web/` o `Sources/HolaSwift/`, vuelve a compilar el WebAssembly (hace falta Docker abierto):
+Si cambiáis algo de `Sources/Web/` o `Sources/HolaSwift/`, volved a compilar el WebAssembly (hace falta Docker abierto):
 
     ./scripts/compilar-web.sh
 
-Se compila con **Embedded Swift**, la versión reducida de Swift: el `.wasm` pesa unos 120 KB (50 KB comprimido) en vez de casi 4 MB. Deja en `assets/swift/` el `Web.wasm` y el JavaScript que lo arranca, que genera JavaScriptKit (no se toca a mano). La acción de GitHub lo compila también en cada push y publica el que acaba de compilar.
+Se compila con **Embedded Swift**, la versión reducida de Swift: el `.wasm` pesa unos 340 KB (140 KB comprimido) en vez de casi 4 MB. Deja en `assets/swift/` el `Web.wasm` y el JavaScript que lo arranca, que genera JavaScriptKit (no se toca a mano). La acción de GitHub lo compila también en cada push para comprobar que no hay errores, pero la web publica el que está en el repositorio: subidlo siempre recompilado.
 
 ### Embedded Swift: lo que no vale en `Sources/Web` ni en `Sources/HolaSwift`
 
 `HolaSwift` también lo compila el navegador, así que sigue las mismas reglas:
 
 - **Sin `Codable`**: el generador lee el JSON con `JSONDecoder` (las conformancias van en `#if !hasFeature(Embedded)`); la página lo lee campo a campo desde JavaScript.
-- **Sin `==` entre `String`**: compara con `mismoTexto(a, b)`, byte a byte. `==` tiene en cuenta Unicode y arrastra unos 700 KB de tablas.
+- **Sin `==` entre `String`**: comparad con `mismoTexto(a, b)`, byte a byte. `==` tiene en cuenta Unicode y arrastra unos 700 KB de tablas.
 - **Sin `lowercased()`, `uppercased()` ni recorrer `Character`**: se trabaja con `unicodeScalars` (ver `mayuscula`, `minuscula`, `iniciales`).
-- **Sin key paths** (`\.esTaller`): usa closures (`{ $0.esTaller }`).
+- **Sin key paths** (`\.esTaller`): usad closures (`{ $0.esTaller }`).
 - **Métodos de JavaScript solo sobre objetos**: un texto de JavaScript (por ejemplo, lo que devuelve `toISOString()`) se pasa a `String` con `.string` y se trata en Swift.
-- **Cuidado con `Int(Double)`**: con `NaN` detiene Swift. Usa `numero(_:)`, que devuelve `nil`.
-- **No llames a un método de JavaScript que puede no existir**: llamar a algo que no es una función detiene Swift. Para `closest` usa `masCercano(_:_:)`, y para `focus`, `enfocar(_:)`; los dos lo miran antes.
-- **Guarda los `JSClosure`**: un listener tiene que seguir vivo mientras la página lo pueda llamar. Usa `escuchar(_:_:_:)` o `closure(_:)` (Hojas.swift), que los guardan.
+- **Cuidado con `Int(Double)`**: con `NaN` detiene Swift. Usad `numero(_:)`, que devuelve `nil`.
+- **No llaméis a un método de JavaScript que puede no existir**: llamar a algo que no es una función detiene Swift. Para `closest` usad `masCercano(_:_:)`, y para `focus`, `enfocar(_:)`; los dos lo miran antes.
+- **Guardad los `JSClosure`**: un listener tiene que seguir vivo mientras la página lo pueda llamar. Usad `escuchar(_:_:_:)` o `closure(_:)` (Hojas.swift), que los guardan.
 
 Si algo de esto se cuela, `./scripts/compilar-web.sh` no enlaza (falta un símbolo) o la página da `RuntimeError: unreachable` en la consola; las tarjetas que trae el HTML se quedan como están.

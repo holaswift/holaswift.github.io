@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "fecha": "2027-01-20T19:00:00+01:00",
+    "titulo": "Arrancamos 2027",
+    "notas": "La primera quedada del año, con tres charlas. Los temas, muy pronto.",
+    "charlas": [
+      {
+        "titulo": "Tema por desvelar",
+        "ponentes": [{ "nombre": "Julio César Fernández Muñoz", "foto": "assets/ponentes/julio-cesar-fernandez-munoz.webp" }]
+      },
+      {
+        "titulo": "Tema por desvelar",
+        "ponentes": [{ "nombre": "Asier G. Morato", "foto": "assets/ponentes/asier-g-morato.webp" }]
+      },
+      {
+        "titulo": "Tema por desvelar",
+        "ponentes": [{ "nombre": "Pol Piella Abadia", "foto": "assets/ponentes/pol-piella-abadia.webp" }]
+      }
+    ]
+  },
+  {
+    "fecha": "2027-02-17T19:00:00+01:00",
+    "titulo": "En preparación",
+    "notas": "Arturo está preparando su charla. El tema, muy pronto.",
+    "charlas": [
+      {
+        "titulo": "Tema por desvelar",
+        "ponentes": [{ "nombre": "Arturo Rivas Arias", "foto": "assets/ponentes/arturo-rivas-arias.webp" }]
+      }
+    ]
+  }
+]
