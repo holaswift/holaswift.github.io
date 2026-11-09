@@ -1,7 +1,7 @@
-// Lo que corre en el navegador, compilado a WebAssembly con Embedded Swift: ./scripts/compilar-web.sh lo deja en assets/swift/.
+// The page's entry point, compiled to WebAssembly with Embedded Swift (./scripts/build-web.sh writes it to assets/swift/).
 //
-// Embedded Swift no tiene Codable: los datos se leen campo a campo del objeto de JavaScript. Los números y las fechas
-// los resuelve JavaScript (Number, Intl, Date), que ya está en el navegador, para que el .wasm no tenga que llevarlos.
+// Embedded Swift has no Codable, so data is read field by field from JavaScript objects. Numbers and dates are left to
+// the browser's Number, Intl and Date, so the .wasm doesn't have to carry that code.
 
 import HolaSwift
 import JavaScriptKit
@@ -9,169 +9,141 @@ import JavaScriptKit
 let global = JSValue.object(JSObject.global)
 let document = global.document
 
-func buscar(_ selector: String, en raiz: JSValue = document) -> JSValue {
-    raiz.querySelector(selector)
+func find(_ selector: String, inside root: JSValue = document) -> JSValue {
+    root.querySelector(selector)
 }
 
-/// El número que hay en un valor de JavaScript, o nil si no lo es. Pasar NaN a Int detiene Swift (trap), así que se mira antes.
-func numero(_ v: JSValue) -> Int? {
+/// The number in a JavaScript value, or `nil` if it isn't a finite one (converting NaN to `Int` traps).
+func intValue(_ v: JSValue) -> Int? {
     guard let n = global.Number(v).number, n.isFinite else { return nil }
     return Int(n)
 }
 
-func opciones(_ pares: [(String, String)]) -> JSValue {
+func options(_ pairs: [(String, String)]) -> JSValue {
     let o = global.Object.object!.new()
-    for (clave, valor) in pares { o[clave] = .string(valor) }
+    for (key, value) in pairs { o[key] = .string(value) }
     return .object(o)
 }
 
-// MARK: - Leer los datos de la página
+// MARK: - Reading the page's data
 
-func texto(_ o: JSValue, _ clave: String) -> String? { o.object?[clave].string }
+func text(_ o: JSValue, _ key: String) -> String? { o.object?[key].string }
 
-func lista(_ o: JSValue) -> [JSValue] {
+func jsArray(_ o: JSValue) -> [JSValue] {
     guard let n = o.length.number else { return [] }
     return (0..<Int(n)).map { o[$0] }
 }
 
-func quedada(_ o: JSValue) -> Quedada? {
-    guard let fecha = texto(o, "fecha"), let titulo = texto(o, "titulo") else { return nil }
-    let charlas = lista(o.charlas).compactMap { c -> Charla? in
-        guard let titulo = texto(c, "titulo") else { return nil }
-        let ponentes = c.ponentes.object == nil ? nil : lista(c.ponentes).compactMap { p -> Ponente? in
-            texto(p, "nombre").map { Ponente(nombre: $0, foto: texto(p, "foto")) }
+func meetup(_ o: JSValue) -> Meetup? {
+    guard let date = text(o, "date") else { return nil }
+    let talks = jsArray(o.talks).compactMap { c -> Talk? in
+        guard c.object != nil else { return nil }
+        let speakers = c.speakers.object == nil ? nil : jsArray(c.speakers).compactMap { p -> Speaker? in
+            text(p, "name").map { Speaker(name: $0, photo: text(p, "photo")) }
         }
-        return Charla(titulo: titulo, ponentes: ponentes, tipo: texto(c, "tipo"), descripcion: texto(c, "descripcion"))
+        return Talk(title: text(c, "title"), speakers: speakers, type: text(c, "type"), description: text(c, "description"), summary: text(c, "summary"))
     }
-    return Quedada(fecha: fecha, titulo: titulo, notas: texto(o, "notas"), enlace: texto(o, "enlace"), demo: o.demo.boolean, charlas: charlas)
+    return Meetup(date: date, title: text(o, "title"), notes: text(o, "notes"), link: text(o, "link"), demo: o.demo.boolean, openSlot: o.openSlot.boolean, talks: talks)
 }
 
-// MARK: - Fechas, con el Intl del navegador
+// MARK: - Dates, with the browser's Intl
 
-let madrid = "Europe/Madrid"
-let partes = global.Intl.DateTimeFormat.object!.new("en-US", opciones([
-    ("timeZone", madrid), ("year", "numeric"), ("month", "numeric"), ("day", "numeric"),
+let madridTimeZone = "Europe/Madrid"
+let parts = global.Intl.DateTimeFormat.object!.new("en-US", options([
+    ("timeZone", madridTimeZone), ("year", "numeric"), ("month", "numeric"), ("day", "numeric"),
     ("hour", "numeric"), ("minute", "numeric"), ("hourCycle", "h23"),
 ]))
-let fechaLarga = global.Intl.DateTimeFormat.object!.new("es-ES", opciones([
-    ("timeZone", madrid), ("weekday", "long"), ("day", "numeric"), ("month", "long"), ("year", "numeric"),
-]))
 
-func momento(_ ms: Double) -> Momento {
-    var anio = 0, mes = 1, dia = 1, hora = 0, minuto = 0
-    for parte in lista(JSValue.object(partes).formatToParts(ms)) {
-        guard let valor = numero(parte.value) else { continue }
-        let tipo = parte.type.string ?? ""
-        if mismoTexto(tipo, "year") { anio = valor }
-        else if mismoTexto(tipo, "month") { mes = valor }
-        else if mismoTexto(tipo, "day") { dia = valor }
-        else if mismoTexto(tipo, "hour") { hora = valor }
-        else if mismoTexto(tipo, "minute") { minuto = valor }
+func moment(_ ms: Double) -> Moment {
+    var year = 0, month = 1, day = 1, hour = 0, minute = 0
+    for part in jsArray(JSValue.object(parts).formatToParts(ms)) {
+        guard let value = intValue(part.value) else { continue }
+        let type = part.type.string ?? ""
+        if sameText(type, "year") { year = value }
+        else if sameText(type, "month") { month = value }
+        else if sameText(type, "day") { day = value }
+        else if sameText(type, "hour") { hour = value }
+        else if sameText(type, "minute") { minute = value }
     }
-    return Momento(ms: ms, anio: anio, mes: mes, dia: dia, hora: hora, minuto: minuto)
+    return Moment(ms: ms, year: year, month: month, day: day, hour: hour, minute: minute)
 }
 
-func ahora() -> Double { global.Date.now().number ?? 0 }
-func instante(_ fecha: String) -> Double { global.Date.parse(fecha).number ?? 0 }
+func now() -> Double { global.Date.now().number ?? 0 }
+func instant(_ date: String) -> Double { global.Date.parse(date).number ?? 0 }
 
-// MARK: - Quedadas
+// MARK: - Sessions
 
-/// nil si no se pudieron leer: entonces se quedan las tarjetas que ya trae el HTML, sin tocarlas.
-let leidas: [Quedada]? = {
-    guard let json = buscar("#quedadas-datos").textContent.string else { return nil }
-    let datos = global.JSON.parse(json)
-    guard global.Array.isArray(datos).boolean == true else { return nil }
-    let quedadas = lista(datos).compactMap(quedada)
-    return quedadas.count == lista(datos).count ? quedadas : nil
+/// The sessions from the page's `#meetups-data` JSON, or `nil` if any can't be read, in which case the generated HTML
+/// is left untouched.
+let loaded: [Meetup]? = {
+    guard let json = find("#meetups-data").textContent.string else { return nil }
+    let info = global.JSON.parse(json)
+    guard global.Array.isArray(info).boolean == true else { return nil }
+    let meetups = jsArray(info).compactMap(meetup)
+    return meetups.count == jsArray(info).count ? meetups : nil
 }()
-let quedadas = leidas ?? []
-let momentos = quedadas.map { momento(instante($0.fecha)) }
-let hoy = momento(ahora())
+let meetups = loaded ?? []
+let moments = meetups.map { moment(instant($0.date)) }
+let today = moment(now())
 
-func pintarQuedadas() {
-    let lista = buscar("#eventos-lista")
-    guard lista.object != nil else { return }
-    lista.innerHTML = .string(tarjetas(quedadas, momentos: momentos, hoy: hoy))
-    aparece(lista)
+func renderSessions() {
+    let rows = find("#sessions-list")
+    guard rows.object != nil else { return }
+    rows.innerHTML = .string(sessionRows(meetups, moments: moments, today: today))
+    appears(rows)
+    startCountdown()
 }
 
-/// (En Swift y no con replace() de JavaScript: el resultado de toISOString() es un texto, no un objeto, y JavaScriptKit
-/// solo llama a métodos de objetos.)
-func horaCalendario(_ ms: Double) -> String {
-    let iso = JSValue.object(global.Date.object!.new(ms)).toISOString().string ?? ""
-    var s = "", saltar = 0
-    for c in iso.unicodeScalars {
-        if saltar > 0 { saltar -= 1; continue }
-        if c == "." { saltar = 3; continue }
-        if c != "-" && c != ":" { s.unicodeScalars.append(c) }
-    }
-    return s
-}
-
-func calendario(_ q: Quedada, _ m: Momento) -> String {
-    let lineas = [
-        "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//hola Swift//ES", "BEGIN:VEVENT",
-        "UID:" + horaCalendario(m.ms) + "-holaswift", "DTSTAMP:" + horaCalendario(ahora()),
-        "DTSTART:" + horaCalendario(m.ms), "DTEND:" + horaCalendario(m.ms + Double(minutos(q)) * 60_000),
-        "SUMMARY:" + textoCalendario("hola Swift: " + q.titulo), "DESCRIPTION:" + textoCalendario(descripcionCalendario(q)),
-        "LOCATION:Discord", "END:VEVENT", "END:VCALENDAR",
-    ]
-    return "data:text/calendar;charset=utf-8," + (global.encodeURIComponent(lineas.joined(separator: "\r\n")).string ?? "")
-}
-
-func abrirHoja(_ i: Int) {
-    let hoja = buscar("#cal .cal-hoja")
-    guard quedadas.indices.contains(i), hoja.object != nil else { return }
-    let q = quedadas[i], m = momentos[i], pasado = yaPaso(m, hoy: hoy)
-    let fecha = JSValue.object(fechaLarga).format(m.ms).string ?? ""
-    var en = buscar(".cal-tipo", en: hoja); en.textContent = .string(categoria(q) + (q.demo == true ? " · Ejemplo" : ""))
-    en = buscar("h3", en: hoja); en.textContent = .string(q.titulo)
-    en = buscar(".cal-cuando", en: hoja); en.innerHTML = .string(mayusculaInicial(fecha) + "<span>" + m.horaMinuto + " (hora de España) · Discord</span>")
-    en = buscar(".cal-charlas", en: hoja); en.innerHTML = .string(charlasHoja(q))
-    en = buscar(".cal-notas .cal-desc", en: hoja); en.textContent = .string(q.notas ?? "")
-    en = buscar(".cal-notas", en: hoja); en.hidden = .boolean(q.notas == nil)
-    en = buscar(".cal-ics", en: hoja); en.href = .string(calendario(q, m))
-    en = buscar(".cal-accion", en: hoja); en.hidden = .boolean(pasado)
-    origenQuedada = "quedada-\(m.anio)-" + (m.mes < 10 ? "0" : "") + "\(m.mes)"
-    _ = hoja.classList.toggle("sin-accion", pasado)
-    mostrarQuedada()
-}
-
-let alPulsarTarjeta = JSClosure { argumentos in
-    let boton = masCercano(argumentos[0].target, "[data-evento]")
-    if boton.object != nil, let i = numero(boton.dataset.evento) { abrirHoja(i) }
-    return .undefined
-}
-
-// MARK: - Embajadores
-
-/// Cada visita en un orden distinto, para que nadie salga siempre primero. El hueco de «Muy pronto» se queda al final.
-func barajarEmbajadores() {
-    let contenedor = buscar(".embajadores-lista")
-    guard contenedor.object != nil else { return }
-    var personas = lista(contenedor.querySelectorAll(":scope > article.persona"))
-    if personas.count > 1 {
-        for i in stride(from: personas.count - 1, to: 0, by: -1) {
-            personas.swapAt(i, Int((global.Math.random().number ?? 0) * Double(i + 1)))
+/// Ticks every countdown on the page (the row's and the copy on the open card) once a second.
+///
+/// The first tick runs immediately; otherwise, for a second, the clock would show what was drawn before it started.
+func startCountdown() {
+    func tick() {
+        let t = now()
+        for el in jsArray(document.querySelectorAll(".countdown[data-at]")) {
+            guard let at = global.Number(el.dataset.at).number, at.isFinite else { continue }
+            let minutes = intValue(el.dataset.minutes) ?? 60
+            // Only rewrite on change: otherwise the “En directo” dot would restart its CSS animation every second.
+            let shown = countdown(from: t, to: at, minutes: minutes)
+            guard !sameText(el.dataset.shown.string ?? "", shown) else { continue }
+            el.innerHTML = .string(shown); el.dataset.shown = .string(shown)
         }
     }
-    for persona in personas.reversed() { _ = contenedor.prepend(persona) }
+    tick()
+    _ = global.setInterval(closure { _ in tick() }, 1000)
 }
 
-// MARK: - Arranque
 
-prepararHeroe()
+// MARK: - Ambassadors
 
-/// Lo demás, cuando el logo ya lleva dos fotogramas en marcha: así no le quita tiempo al principio de la animación.
-func prepararElResto() {
-    prepararPagina()
-    barajarEmbajadores()
-    if leidas != nil { pintarQuedadas() }
-    prepararHojas()
-    prepararDuo()
-    _ = buscar("#eventos-lista").addEventListener("click", JSValue.object(alPulsarTarjeta))
-    document.documentElement.dataset.swift = "listo"   // <html data-swift="listo">: Swift ya ha arrancado
+/// A different order on every visit, so nobody is always first. The “Muy pronto” slot stays at the end.
+func shuffleAmbassadors() {
+    let container = find(".ambassadors-grid")
+    guard container.object != nil else { return }
+    var people = jsArray(container.querySelectorAll(":scope > article.person"))
+    if people.count > 1 {
+        for i in stride(from: people.count - 1, to: 0, by: -1) {
+            people.swapAt(i, Int((global.Math.random().number ?? 0) * Double(i + 1)))
+        }
+    }
+    for person in people.reversed() { _ = container.prepend(person) }
+}
+
+// MARK: - Start-up
+
+setUpHero()
+
+/// Sets up everything but the hero, two frames after it starts, so it doesn't steal time from the logo animation.
+func setUpTheRest() {
+    setUpPage()
+    shuffleAmbassadors()
+    if loaded != nil { renderSessions() }
+    setUpSheets()
+    setUpSessionCard()
+    setUpDuo()
+    setUpAR()
+    document.documentElement.dataset.swift = "listo"   // index.html's CSS falls back to timed reveals without data-swift
     _ = global.console.log("hola 👋 Esta web corre en Swift compilado a WebAssembly.")
 }
-let despues = closure { _ in prepararElResto() }
-_ = global.requestAnimationFrame(closure { _ in _ = global.requestAnimationFrame(closure { _ in _ = global.setTimeout(despues, 0) }) })
+let later = closure { _ in setUpTheRest() }
+_ = global.requestAnimationFrame(closure { _ in _ = global.requestAnimationFrame(closure { _ in _ = global.setTimeout(later, 0) }) })

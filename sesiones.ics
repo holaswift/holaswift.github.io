@@ -1,0 +1,33 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//hola Swift//Sesiones//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:hola Swift
+X-WR-CALDESC:Las sesiones online de hola Swift
+X-WR-TIMEZONE:Europe/Madrid
+REFRESH-INTERVAL;VALUE=DURATION:PT6H
+X-PUBLISHED-TTL:PT6H
+BEGIN:VEVENT
+UID:sesion-2027-01@holaswift.com
+DTSTAMP:20270120T180000Z
+DTSTART:20270120T180000Z
+DTEND:20270120T191500Z
+SUMMARY:hola Swift: Las personas detrás del código
+DESCRIPTION:Asier G. Morato: Ebanistas en la era del plástico\nJulio Césa
+ r Fernández Muñoz: Compilar no basta: arquitectura de agentes para desar
+ rollo Apple\nPol Piella Abadia: Lo que no sale en la demo
+LOCATION:Discord
+URL:https://holaswift.com/#sesiones
+END:VEVENT
+BEGIN:VEVENT
+UID:sesion-2027-02@holaswift.com
+DTSTAMP:20270217T180000Z
+DTSTART:20270217T180000Z
+DTEND:20270217T185500Z
+SUMMARY:hola Swift: Sesión de febrero 2027
+DESCRIPTION:Arturo Rivas Arias: Próximamente
+LOCATION:Discord
+URL:https://holaswift.com/#sesiones
+END:VEVENT
+END:VCALENDAR

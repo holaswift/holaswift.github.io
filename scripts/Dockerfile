@@ -1,6 +1,6 @@
-# Swift 6.4.1 con su SDK de WebAssembly (tienen que ser exactamente la misma versión).
-# El SDK se baja con curl y se comprueba con sha256sum: `swift sdk install <url>` lo instala bien pero en Linux
-# se cuelga al terminar (fallo de su cliente de descargas), y eso rompe el build.
+# Swift 6.4.1 with its WebAssembly SDK (they must be exactly the same version).
+# The SDK is downloaded with curl and verified with sha256sum: `swift sdk install <url>` installs it fine but on Linux
+# it hangs when finishing (a bug in its download client), and that breaks the build.
 FROM swift:6.4.1
 ARG SDK=https://download.swift.org/swift-6.4.1-release/wasm-sdk/swift-6.4.1-RELEASE/swift-6.4.1-RELEASE_wasm.artifactbundle.tar.gz
 ARG SDK_SHA256=783e6128d174d9f975b4eda68be02a5960681b723ef372e6876a7c2543a365d8

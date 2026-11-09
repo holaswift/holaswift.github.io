@@ -1,0 +1,41 @@
+/* What every page of holaswift.com shares: fonts, brand tokens, the logo and the main button.
+   /prensa/, /presentaciones/ and /herramientas/ live in other repositories and load it as /assets/css/base.css. */
+@font-face{font-family:"Inter";src:url(../fuentes/inter-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Inter";src:url(../fuentes/inter-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Inter";src:url(../fuentes/inter-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Inter Display";src:url(../fuentes/inter-display-600.woff2) format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Inter Display";src:url(../fuentes/inter-display-700.woff2) format("woff2");font-weight:700;font-display:swap}
+/* tokens from the hola Swift brand book (claude.ai/artifact/Q1u5tedocMigdjNJV3gRU2) */
+:root{
+  --page:#F7F7F7; --surface:#FFFFFF; --hairline:#E3E3E8; --text:#111111; --text-2:#55555F; --text-3:#6E6E78;
+  --link:#0066CC; --interface:#007AFF;   /* blue: the interface (links, focus); orange: Swift and the main buttons */
+  --button:#D24020; --button-press:#B83519;   /* deeper orange so white text reaches 4.7:1 (#FF6B4D only gives 2.8:1) */
+  --cta:#F05138; --cta-press:#DE4529;   /* the Swift logo's orange: white text only reaches 3.5:1, a brand choice */
+  /* the clay of the 3D logo: light from above, edges rounding into shade */
+  --clay:radial-gradient(90% 70% at 50% 18%,rgba(255,255,255,.2),transparent 70%),linear-gradient(rgba(255,255,255,.08),transparent 40%,transparent 62%,rgba(90,20,0,.14));
+  --clay-edge:inset 0 1.5px 1px rgba(255,255,255,.3),inset 0 -2px 4px rgba(110,25,0,.2),inset 0 0 0 1px rgba(150,40,10,.14),0 3px 8px -3px rgba(200,60,20,.45);
+  /* pressed: the light flips, as if the clay were pushed in */
+  --clay-in:linear-gradient(rgba(90,20,0,.2),transparent 45%,transparent 72%,rgba(255,255,255,.1));
+  --clay-in-edge:inset 0 2px 5px rgba(100,20,0,.38),inset 0 -1px 1px rgba(255,255,255,.22),inset 0 0 0 1px rgba(150,40,10,.18),0 1px 2px -1px rgba(200,60,20,.4);
+  --swift:#FF6B4D;
+  --f-headings:"Inter Display","Inter",system-ui,sans-serif; --f-text:"Inter",system-ui,sans-serif;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --sa-t:env(safe-area-inset-top,0px); --sa-r:env(safe-area-inset-right,0px); --sa-b:env(safe-area-inset-bottom,0px); --sa-l:env(safe-area-inset-left,0px);
+  color-scheme:light;
+}
+/* iPad has no notch: what Safari 26 reports there as the top inset is its own toolbar, which the page already sits below,
+   so adding it only left an empty band above the bar. 744px is the narrowest iPad; the height keeps out an iPhone in landscape (under 450px tall) */
+@media (pointer:coarse) and (min-width:744px) and (min-height:520px){:root{--sa-t:0px}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--text);font-family:var(--f-text);-webkit-font-smoothing:antialiased}
+
+.brand{display:block;line-height:0}
+.brand img{display:block;height:36px;width:auto}
+@media (max-width:760px){.brand img{height:30px}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 18px;border-radius:999px;border:0;background:var(--clay),var(--cta);box-shadow:var(--clay-edge);color:#fff;text-shadow:0 1px 1px rgba(120,25,0,.25);
+  font:600 15px/1 var(--f-text);text-decoration:none;cursor:pointer;white-space:nowrap;transition:transform .2s var(--ease-out),background-color .2s,box-shadow .12s}
+.btn:hover{background-color:var(--cta-press)}
+.btn:active:not(:disabled){background:var(--clay-in),var(--cta-press);box-shadow:var(--clay-in-edge);transform:translateY(1px) scale(.98)}
+.btn.lg{height:52px;padding:0 26px;font-size:17px}

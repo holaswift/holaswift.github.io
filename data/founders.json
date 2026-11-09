@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Alejandro Mohamad",
+    "shortName": "Ale Mohamad",
+    "role": "Founder",
+    "photo": "assets/equipo/alejandro-mohamad.webp",
+    "bio": "Desarrollador de apps para plataformas Apple desde 2014. Apasionado por Swift, SwiftUI y Swift Playground, la educación y la creatividad. Cree en aprender compartiendo, y de esa idea nació hola Swift.",
+    "x": "https://x.com/alemohamad",
+    "linkedin": "https://www.linkedin.com/in/alemohamad/"
+  },
+  {
+    "name": "Jon Ander Orcera",
+    "shortName": "Jon Orcera",
+    "role": "Founder",
+    "photo": "assets/equipo/jon-ander-orcera.webp",
+    "bio": "Project Manager de Apple Coding Academy desde hace seis años, con el desarrollo nativo por bandera. Conecta talento, ideas y oportunidades dentro del ecosistema Apple. Funda hola Swift porque cree que las grandes ideas nacen de personas, pero crecen cuando las personas se unen.",
+    "linkedin": "https://www.linkedin.com/in/jonanderorcera"
+  },
+  {
+    "name": "Javier Segura Perez",
+    "shortName": "Javier Segura",
+    "role": "Founder",
+    "photo": "assets/equipo/javier-segura-perez.webp",
+    "bio": "Lleva más de 25 años convirtiendo ideas en tecnología que funciona. Creó la primera empresa de España dedicada a las apps para iPhone, que publicó la primera app de El País, y hoy explora el 3D y la computación espacial con Swift. Funda hola Swift para que esa experiencia se comparta y más proyectos lleguen a buen puerto.",
+    "linkedin": "https://www.linkedin.com/in/javier-segura-perez-miogds/"
+  }
+]

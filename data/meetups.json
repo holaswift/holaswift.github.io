@@ -1,0 +1,56 @@
+[
+  {
+    "date": "2027-01-20T19:00:00+01:00",
+    "title": "Las personas detrás del código",
+    "notes": "Programar no es solo escribir código: también es decidir qué tipo de profesional quieres ser y cuidarte por el camino. Abrimos 2027 con tres presentaciones sobre el valor de lo que hacemos las personas, el rigor que ninguna herramienta te regala y la salud mental de quien está detrás del teclado.",
+    "talks": [
+      {
+        "title": "Ebanistas en la era del plástico",
+        "summary": "Cómo crecer como estudio pequeño pensando como un ebanista: el valor está en las personas.",
+        "speakers": [
+          {
+            "name": "Asier G. Morato",
+            "photo": "assets/caras/asier-g-morato.webp"
+          }
+        ],
+        "description": "Los modelos de lenguaje han hecho que cualquiera pueda fabricar apps como sillas de plástico: rápidas, baratas y olvidables. Parece que ya está todo hecho, pero no. Ven a descubrir cómo los estudios pequeños pueden crecer si piensan como un ebanista: poniendo el valor en las personas que hay detrás y creando lo que nadie olvida."
+      },
+      {
+        "title": "Compilar no basta: arquitectura de agentes para desarrollo Apple",
+        "summary": "Por qué compilar no basta y cómo montar agentes y skills que validen de verdad tu código.",
+        "speakers": [
+          {
+            "name": "Julio César Fernández Muñoz",
+            "photo": "assets/caras/julio-cesar-fernandez-munoz.webp"
+          }
+        ],
+        "description": "Compilar nunca ha sido una métrica que valide la calidad de tu código. Solo demuestra que pasa un mínimo de comprobaciones. Por lo tanto, confiar ciegamente en un modelo de lenguaje en un desarrollo móvil serio y profesional es una condena. En esta presentación te damos las líneas generales de cómo construir un sistema de agentes, skills y ayudas que validen al máximo tu trabajo, garantizando mejores resultados y minimizando la supervisión."
+      },
+      {
+        "title": "Lo que no sale en la demo",
+        "summary": "Una presentación honesta sobre crear software cuando la cabeza no acompaña, y lo que de verdad ayuda.",
+        "speakers": [
+          {
+            "name": "Pol Piella Abadia",
+            "photo": "assets/caras/pol-piella-abadia.webp"
+          }
+        ],
+        "description": "Crear software cuando tu mente no te lo pone fácil. Detrás de cada demo impecable hay días en los que la cabeza no acompaña, y de eso casi nunca se habla. Una presentación honesta sobre lo que no se ve en las presentaciones, lo que de verdad ayuda y cómo seguir construyendo sin dejarte la salud por el camino."
+      }
+    ]
+  },
+  {
+    "date": "2027-02-17T19:00:00+01:00",
+    "openSlot": true,
+    "talks": [
+      {
+        "speakers": [
+          {
+            "name": "Arturo Rivas Arias",
+            "photo": "assets/caras/arturo-rivas-arias.webp"
+          }
+        ]
+      }
+    ]
+  }
+]

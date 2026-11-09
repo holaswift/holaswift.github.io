@@ -1,0 +1,82 @@
+[
+  {
+    "date": "2026-10-21T19:00:00+02:00",
+    "title": "Presentación de hola Swift",
+    "demo": false,
+    "notes": "La primera quedada: os contamos cómo serán las siguientes y cómo podéis participar.",
+    "talks": [
+      {
+        "title": "Qué es hola Swift y cómo participar",
+        "speakers": [
+          {
+            "name": "Jon Ander Orcera",
+            "photo": "assets/equipo/jon-ander-orcera.webp"
+          },
+          {
+            "name": "Alejandro Mohamad",
+            "photo": "assets/equipo/alejandro-mohamad.webp"
+          }
+        ],
+        "description": "Os contamos qué es hola Swift, cómo serán las quedadas online y cómo podéis participar, proponer temas o dar una presentación."
+      }
+    ]
+  },
+  {
+    "date": "2026-11-18T19:00:00+01:00",
+    "title": "Empezar con SwiftUI",
+    "demo": false,
+    "talks": [
+      {
+        "title": "Tu primera app con SwiftUI",
+        "speakers": [
+          {
+            "name": "Julio César Fernández Muñoz",
+            "photo": "assets/equipo/julio-cesar-fernandez-munoz.webp"
+          }
+        ],
+        "description": "Empezamos con un proyecto vacío en Xcode y terminamos con una app que funciona en tu iPhone. Vistas, estado y navegación, paso a paso y sin dar nada por sabido."
+      },
+      {
+        "title": "Animaciones que se sienten de Apple",
+        "speakers": [],
+        "description": "Springs, transiciones y matchedGeometryEffect. Veremos por qué unas animaciones se sienten bien y otras no, y cómo afinarlas en SwiftUI."
+      },
+      {
+        "title": "Del diseño en Figma al código en SwiftUI",
+        "speakers": [],
+        "description": "Cómo pasar de un diseño a vistas reutilizables: tokens de color y tipografía, componentes y cómo hablar el mismo idioma con diseño."
+      }
+    ]
+  },
+  {
+    "date": "2026-12-16T19:00:00+01:00",
+    "title": "Swift moderno",
+    "demo": false,
+    "talks": [
+      {
+        "title": "Swift Concurrency sin miedo: async/await y actores",
+        "speakers": [],
+        "description": "Qué es una tarea, cuándo usar un actor y cómo dejar de pelearte con los avisos de Swift 6. Con ejemplos de apps reales."
+      },
+      {
+        "title": "SwiftData en una app de verdad",
+        "speakers": [],
+        "type": "workshop",
+        "description": "Modelos, relaciones, migraciones y sincronización con iCloud. Lo que no sale en la demo de la WWDC."
+      }
+    ]
+  },
+  {
+    "date": "2027-01-20T19:00:00+01:00",
+    "title": "Apps para todo el mundo",
+    "demo": false,
+    "talks": [
+      {
+        "title": "Accesibilidad: VoiceOver y Dynamic Type",
+        "speakers": [],
+        "type": "workshop",
+        "description": "Hacemos accesible una app paso a paso: etiquetas, orden de lectura, tamaños de texto y contraste. Trae tu iPhone con VoiceOver a mano."
+      }
+    ]
+  }
+]

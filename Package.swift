@@ -1,9 +1,9 @@
 // swift-tools-version:6.0
-// hola Swift: la web, hecha en Swift.
+// hola Swift: the website, built in Swift.
 //
-//   HolaSwift  la lógica compartida (modelos, quedadas, tarjetas, hoja), sin Foundation para que quepa en WebAssembly
-//   Generar    escribe el equipo, las quedadas y los patrocinadores en index.html:  swift run generar [--comprobar]
-//   Web        lo que corre en el navegador, compilado a WebAssembly:              ./scripts/compilar-web.sh
+//   HolaSwift  the shared logic (models, meetups, cards, sheet), without Foundation so it fits in WebAssembly
+//   Generate   writes the team, the meetups and the sponsors into index.html:  swift run generate [--check]
+//   Web        what runs in the browser, compiled to WebAssembly:              ./scripts/build-web.sh
 
 import PackageDescription
 
@@ -11,7 +11,7 @@ let package = Package(
     name: "HolaSwift",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "generar", targets: ["Generar"]),
+        .executable(name: "generate", targets: ["Generate"]),
         .executable(name: "Web", targets: ["Web"]),
     ],
     dependencies: [
@@ -19,11 +19,11 @@ let package = Package(
     ],
     targets: [
         .target(name: "HolaSwift"),
-        .executableTarget(name: "Generar", dependencies: ["HolaSwift"]),
+        .executableTarget(name: "Generate", dependencies: ["HolaSwift"]),
         .executableTarget(
             name: "Web",
             dependencies: ["HolaSwift", .product(name: "JavaScriptKit", package: "JavaScriptKit")],
-            swiftSettings: [.swiftLanguageMode(.v5)]   // los objetos de JavaScript no son Sendable
+            swiftSettings: [.swiftLanguageMode(.v5)]   // JavaScript objects aren't Sendable
         ),
     ]
 )
