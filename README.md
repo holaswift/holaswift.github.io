@@ -60,6 +60,7 @@ Todos los campos y sus reglas están en [`data/README.md`](data/README.md).
 | La página principal | `index.html`. Lo que hay entre `<!-- generated:… -->` y `<!-- /generated:… -->` lo escribe el generador: no lo editéis a mano |
 | Los estilos | `assets/css/base.css` (lo común a todas las páginas, también prensa, presentaciones y herramientas: fuentes, tokens, logo y botón), `assets/css/holaswift.css` (la página principal) y `assets/css/legal.css` (los textos legales) |
 | Textos legales | `aviso-legal.html`, `privacidad.html` y `cookies.html`. Los datos que faltan salen con borde punteado |
+| Código de conducta | `codigo-de-conducta.html`, con el mismo estilo que los textos legales. La versión corta del canal de normas de Discord enlaza aquí: si cambia una, hay que cambiar la otra |
 | El código Swift | `Sources/HolaSwift/` (compartido), `Sources/Generate/` (el generador) y `Sources/Web/` (el navegador). Las reglas de Embedded Swift están en `data/README.md` |
 | Las reglas de diseño | `DESIGN.md`, en el repositorio privado `marca` |
 
