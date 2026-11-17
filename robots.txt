@@ -1,8 +1,10 @@
 # Las herramientas del equipo (/herramientas/) quedan fuera de buscadores y de rastreadores de modelos de lenguaje.
+# A los buscadores no se les bloquea: tienen que poder leer el noindex de cada página. Si no pueden entrar, la
+# dirección puede salir igualmente en resultados cuando alguien la enlaza desde fuera.
 # Ojo: un bot que tiene su propio grupo abajo NO lee el grupo "*", por eso cada grupo repite el Disallow.
 
 User-agent: *
-Disallow: /herramientas/
+Disallow:
 
 # Rastreadores de IA (entrenamiento y búsqueda)
 User-agent: GPTBot

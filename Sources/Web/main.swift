@@ -131,6 +131,7 @@ func shuffleAmbassadors() {
 
 // MARK: - Start-up
 
+setUpStableViewport()   // before the hero: its logo is sized in --svh
 setUpHero()
 
 /// Sets up everything but the hero, two frames after it starts, so it doesn't steal time from the logo animation.

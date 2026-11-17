@@ -159,7 +159,6 @@ func info(_ p: Person, quote: Bool = false) -> String {
     return #"<div class="info"><div><h3>\#(esc(p.cardName))</h3><p class="role">\#(role)</p>\#(line)</div><p class="socials">\#(networks)</p></div>"#
 }
 
-/// The colour “h” stamped on every card.
 let seal = #"<span class="card-seal" aria-hidden="true"><img src="assets/img/icono-h.svg" alt="" width="40" height="40" loading="lazy"></span>"#
 
 /// The collectible card shared by founders and ambassadors.

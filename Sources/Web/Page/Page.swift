@@ -116,7 +116,8 @@ func setUpManifesto() {
     // from the section's top coming up the screen: it opens on arrival, not after a scroll of nothing
     var together = false, opened = false
     everyFrame {
-        let top = Box(section).top, h = viewportHeight()
+        // the frozen height: with innerHeight, in-app browsers' bars moved the thresholds and the letter went in and out
+        let top = Box(section).top, h = frozenViewportHeight ?? viewportHeight()
         if (top < h * 0.5) != together { together = top < h * 0.5; _ = group.classList.toggle("together", together) }
         if (top < h * 0.12) != opened { opened = top < h * 0.12; _ = group.classList.toggle("opened", opened) }
     }
@@ -166,7 +167,7 @@ func setUpLetter() {
     let reading = find(".reading", inside: layer), closeButton = find(".close-letter", inside: layer), signatures = byId("signatures")
     let flight = find(".flight", inside: layer), letter = find(".letter", inside: layer), paper = find(".envelope-paper", inside: flight)
     let envelope = document.querySelector(".glyph-group .envelope"), group = byId("glyph-group")
-    let sheet = document.querySelector(".glyph-group .envelope-paper")   // the manifesto's letter, out of its open envelope
+    let sheet = document.querySelector(".glyph-group .envelope-paper")
     var pending: [JSValue] = [], returnTo: JSValue = .undefined, fromSheet = false
 
     func rest() -> [JSValue] {
@@ -211,7 +212,6 @@ func setUpLetter() {
         step(2800) { _ = letter.classList.remove("grow"); signed(); focusIfPossible(closeButton) },
     ]
 
-    // the sheet comes further out first, on the page; then the letter grows from it
     let lifted = closure { _ in
         let s = Box(sheet)
         _ = layer.classList.add("seal", "flap", "out", "from-sheet"); _ = global.requestAnimationFrame(opening)
@@ -279,7 +279,6 @@ func setUpLetter() {
         let c = Box(letter), r = Box(envelope), s = Box(sheet)
         _ = layer.classList.add("closing")
         if fromSheet && onScreen(s) {
-            // the sheet shows again under it just before it lands
             _ = letter.classList.add("returning", "to-sheet")
             letter.style.transform = .string(fit(c, to: s, height: sheetOut()))
             step(380) { sheet.style.visibility = "" }()

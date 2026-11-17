@@ -3,6 +3,10 @@
 @font-face{font-family:"Homemade Apple sin T";src:url(../fuentes/homemade-apple-400.woff2) format("woff2");font-weight:400;font-display:swap;
   unicode-range:U+0-53,U+55-74,U+76-10FFFF}
 @font-face{font-family:"Permanent Marker";src:url(../fuentes/permanent-marker-400.woff2) format("woff2");font-weight:400;font-display:swap}   /* “Próximamente” marker font (Apache 2.0); only downloaded when a spoiler shows */
+/* Screen-height units go through these so Swift can freeze them on touch screens (StableViewport.swift): in-app
+   browsers resize the page as their bars come and go, and svh/lvh/vh would change on every scroll. vh counts as lvh. */
+:root{--svh:1vh;--lvh:1vh}
+@supports (height:1svh){:root{--svh:1svh;--lvh:1lvh}}
 /* home-only tokens, on top of base.css */
 :root{
   --bg:var(--page); --card:var(--surface); --ink:var(--text); --ink-2:var(--text-2); --ink-3:#B9B9C2; --line:var(--hairline);
@@ -39,9 +43,9 @@ footer .brand img{height:30px}
 .btn:disabled{background:var(--ink-3);box-shadow:none;cursor:default}
 
 /* ── hero ── */
-.hero{position:relative;min-height:calc(100dvh + 40px);min-height:calc(100lvh + 40px);display:grid;grid-template-rows:calc(72px + var(--sa-t)) 1fr auto;padding-bottom:calc(40px + var(--sa-b));overflow:hidden;isolation:isolate}
+.hero{position:relative;min-height:calc(100dvh + 40px);min-height:calc(calc(100 * var(--lvh)) + 40px);display:grid;grid-template-rows:calc(72px + var(--sa-t)) 1fr auto;padding-bottom:calc(40px + var(--sa-b));overflow:hidden;isolation:isolate}
 /* Safari 26 on iPhone paints content under the floating bar, below 100lvh: the manifesto overlap has to land lower */
-@media (pointer:coarse) and (max-width:640px){.hero{min-height:calc(100lvh + 120px);padding-bottom:calc(120px + var(--sa-b))}.hero .glyph-layer{bottom:120px}}
+@media (pointer:coarse) and (max-width:640px){.hero{min-height:calc(calc(100 * var(--lvh)) + 120px);padding-bottom:calc(120px + var(--sa-b))}.hero .glyph-layer{bottom:120px}}
 .hero::before{content:"";position:absolute;inset:0;z-index:-2;
   background-image:radial-gradient(circle at 1.5px 1.5px,#C9C9D1 1.3px,transparent 1.6px);background-size:24px 24px;background-position:center top;
   opacity:calc(.6 + var(--grid,1) * .4);
@@ -64,7 +68,7 @@ footer .brand img{height:30px}
 @keyframes hero-text{to{opacity:1;transform:none;filter:none}}
 @keyframes hero-float{to{transform:translate3d(0px,0px,0) scale(1) rotate(var(--r))}}
 .wrap{display:grid;place-items:center;perspective:1400px;padding:8px 0;grid-row:2}
-.stage{position:relative;aspect-ratio:3005 / 2345;width:min(84vw,calc(58svh * (3005 / 2345)));transform-style:preserve-3d}
+.stage{position:relative;aspect-ratio:3005 / 2345;width:min(84vw,calc(calc(58 * var(--svh)) * (3005 / 2345)));transform-style:preserve-3d}
 .stage svg,.stage .el{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .stage img{position:absolute;display:block;user-select:none;pointer-events:none}
 .el .mesh,.el .col{--p:0;
@@ -90,7 +94,7 @@ footer .brand img{height:30px}
 .sel .tag rect{fill:var(--pen)}
 .sel .tag text{fill:#fff;font-family:var(--f-text);font-weight:600;dominant-baseline:central}
 
-.copy{grid-row:3;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center;padding:0 16px clamp(40px,7vh,84px)}
+.copy{grid-row:3;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center;padding:0 16px clamp(40px,calc(7 * var(--lvh)),84px)}
 .copy h1{font-family:var(--f-headings);font-weight:600;font-size:clamp(24px,2.6vw,34px);line-height:1.18;letter-spacing:-.02em;text-wrap:balance}
 .copy h1 span{color:var(--ink-2)}
 .signup{display:flex;gap:6px;padding:6px;border-radius:999px;background:var(--surface);border:1px solid var(--hairline);width:min(440px,100%)}
@@ -161,7 +165,7 @@ body::after{content:"";position:fixed;inset:-50%;z-index:19;pointer-events:none;
   .floater:nth-child(4){--x:93%!important;--y:20%!important}
   .floater:nth-child(5){--x:94%!important;--y:46%!important}
   .floater:nth-child(6){--x:92%!important;--y:82%!important}
-  .stage{width:min(74vw,calc(52svh * (3005 / 2345)))}
+  .stage{width:min(74vw,calc(calc(52 * var(--svh)) * (3005 / 2345)))}
 }
 @media (max-width:640px){
   .floater.far{display:none}
@@ -176,7 +180,7 @@ body::after{content:"";position:fixed;inset:-50%;z-index:19;pointer-events:none;
 }
 
 /* ── sections ── */
-section{padding-block:clamp(72px,10vh,128px)}
+section{padding-block:clamp(72px,calc(10 * var(--lvh)),128px)}
 h2{font-family:var(--f-headings);font-weight:700;font-size:clamp(34px,5vw,60px);line-height:1.04;letter-spacing:-.035em;text-wrap:balance}
 .lede{font-size:clamp(19px,1.7vw,22px);line-height:1.45;color:var(--ink-2);max-width:56ch;text-wrap:pretty}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity 1s var(--ease-out),transform 1s var(--ease-out)}
@@ -186,11 +190,11 @@ h2{font-family:var(--f-headings);font-weight:700;font-size:clamp(34px,5vw,60px);
 html:not([data-swift]) .reveal,html:not([data-swift]) .manifesto .more{animation:no-swift .6s var(--ease-out) 2.5s forwards}
 
 /* manifesto */
-.manifesto{height:125vh;position:relative;padding:0;background:#0C0B0B;color:#fff;
+.manifesto{height:calc(125 * var(--lvh));position:relative;padding:0;background:#0C0B0B;color:#fff;
   border-radius:40px 40px 0 0;margin-top:-40px}
-.manifesto .pin{position:sticky;top:0;height:100svh;display:flex;align-items:center;overflow:hidden;isolation:isolate;padding-top:calc(64px + var(--sa-t));padding-bottom:var(--sa-b)}   /* room for the bar */
+.manifesto .pin{position:sticky;top:0;height:calc(100 * var(--svh));display:flex;align-items:center;overflow:hidden;isolation:isolate;padding-top:calc(64px + var(--sa-t));padding-bottom:var(--sa-b)}   /* room for the bar */
 .manifesto .wrap-x{display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center}
-.glyph-group{position:relative;aspect-ratio:1;width:100%;max-width:min(720px,calc(100svh - 64px - var(--sa-t) - var(--sa-b) - 24px));justify-self:center}
+.glyph-group{position:relative;aspect-ratio:1;width:100%;max-width:min(720px,calc(calc(100 * var(--svh)) - 64px - var(--sa-t) - var(--sa-b) - 24px));justify-self:center}
 /* no hover on touch screens: there the glyphs come out once it's lit */
 .glyph-group .g{position:absolute;left:50%;top:70%;width:var(--w);translate:-50% -50%;z-index:0;pointer-events:none;
   transform:scale(.4) rotate(0deg);opacity:0;
@@ -203,13 +207,13 @@ html:not([data-swift]) .reveal,html:not([data-swift]) .manifesto .more{animation
   .glyph-group.together .g{left:var(--x);top:var(--y);transform:scale(1) rotate(var(--r));opacity:1}
 }
 .glyph-group .g img{display:block;width:100%;animation:float var(--t,7s) ease-in-out infinite alternate}
-.manifesto.static{height:auto;padding-block:clamp(96px,14vh,168px)}
+.manifesto.static{height:auto;padding-block:clamp(96px,calc(14 * var(--lvh)),168px)}
 .manifesto.static .pin{position:static;height:auto}
 /* short landscape: the pinned moment doesn't fit, so the manifesto reads straight through, already open */
 @media (max-height:520px) and (orientation:landscape){.manifesto{height:auto;padding-block:calc(72px + var(--sa-t)) 64px}.manifesto .pin{position:static;height:auto;padding-top:0}.glyph-group{max-width:440px}}
 @media (max-width:760px){
   .manifesto .pin{padding-top:calc(56px + var(--sa-t))}   /* navbar + island */
-  .glyph-group{max-width:min(520px,calc(100svh - 56px - var(--sa-t) - var(--sa-b) - 16px))}
+  .glyph-group{max-width:min(520px,calc(calc(100 * var(--svh)) - 56px - var(--sa-t) - var(--sa-b) - 16px))}
 }
 
 /* envelope: used closed in the manifesto and in the flight that opens the letter */
@@ -303,7 +307,7 @@ html:not([data-swift]) .envelope-paper .more{animation:no-swift .6s var(--ease-o
 .letter-layer .envelope-paper{transition:transform .65s cubic-bezier(.3,1.25,.5,1)}
 .letter-layer.out .envelope-paper{transform:translateY(-62%)}
 .letter-layer.read .flight .envelope-paper{opacity:0}
-.letter-layer.read .flight{transform:translateY(38vh) rotate(5deg);opacity:0;transition:transform .7s cubic-bezier(.5,0,.75,0),opacity .35s .3s}
+.letter-layer.read .flight{transform:translateY(calc(38 * var(--lvh))) rotate(5deg);opacity:0;transition:transform .7s cubic-bezier(.5,0,.75,0),opacity .35s .3s}
 .reading{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;opacity:0;pointer-events:none;transition:opacity .15s}
 .letter-layer.read .reading{opacity:1;pointer-events:auto}
 .letter{transform-origin:50% 0}
@@ -327,7 +331,7 @@ html:not([data-swift]) .envelope-paper .more{animation:no-swift .6s var(--ease-o
   background:#FFFFFF;color:#111;border:1px solid var(--hairline);display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .3s .2s}
 .letter-layer.read .close-letter{opacity:1}
 .close-letter svg{width:16px;height:16px}
-.letter{width:min(880px,100% - var(--gutter-l) - var(--gutter-r));margin:calc(clamp(72px,11vh,112px) + var(--sa-t)) auto calc(clamp(40px,8vh,80px) + var(--sa-b));background:#FFFFFF;color:#111;border-radius:16px;
+.letter{width:min(880px,100% - var(--gutter-l) - var(--gutter-r));margin:calc(clamp(72px,calc(11 * var(--lvh)),112px) + var(--sa-t)) auto calc(clamp(40px,calc(8 * var(--lvh)),80px) + var(--sa-b));background:#FFFFFF;color:#111;border-radius:16px;
   padding:clamp(32px,7vw,80px) clamp(24px,7vw,84px) clamp(40px,7vw,80px)}
 .letter-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:28px;margin-bottom:40px;border-bottom:1px solid var(--hairline)}
 .letter-head img{height:26px;width:auto;display:block}
@@ -356,7 +360,7 @@ html:not([data-swift]) .envelope-paper .more{animation:no-swift .6s var(--ease-o
 }
 
 /* in person */
-.in-person{position:relative;overflow:hidden;isolation:isolate;background:#0C0B0B;color:#fff;min-height:100svh;display:grid;align-content:center;
+.in-person{position:relative;overflow:hidden;isolation:isolate;background:#0C0B0B;color:#fff;min-height:calc(100 * var(--svh));display:grid;align-content:center;
   padding-block:calc(64px + var(--sa-t) + 48px) 88px}
 .in-person::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
   background:radial-gradient(circle at center,rgba(255,255,255,.075) 1.2px,transparent 1.6px) 0 0/26px 26px;
@@ -395,11 +399,11 @@ html:not([data-swift]) .envelope-paper .more{animation:no-swift .6s var(--ease-o
 /* the strap runs past the section's top edge, so the section's overflow clips it */
 /* .ip-spot stays still and catches the hover: if the pass did, rotating would move it out from under the
    cursor and back, and it would flicker */
-.ip-spot{--w:clamp(250px,25vw,310px);--strap:clamp(260px,34vh,380px);--tab:calc(var(--w) * .2);justify-self:center;width:var(--w);margin-top:clamp(80px,16vh,180px)}
+.ip-spot{--w:clamp(250px,25vw,310px);--strap:clamp(260px,calc(34 * var(--lvh)),380px);--tab:calc(var(--w) * .2);justify-self:center;width:var(--w);margin-top:clamp(80px,calc(16 * var(--lvh)),180px)}
 .ip-hang{position:relative;width:100%;transform-origin:50% calc(-1 * var(--strap));rotate:-2deg;pointer-events:none;
   transition:opacity 1s var(--ease-out),transform 1.1s var(--spring)}
 .ip-spot:hover .ip-hang{transform:rotate(3deg)}
-.ip-strap{position:absolute;left:50%;bottom:calc(100% + var(--tab) - var(--w) * .075 - 2px);width:38px;height:calc(var(--strap) + 100vh);translate:-50% 0;background:var(--button);
+.ip-strap{position:absolute;left:50%;bottom:calc(100% + var(--tab) - var(--w) * .075 - 2px);width:38px;height:calc(var(--strap) + calc(100 * var(--lvh)));translate:-50% 0;background:var(--button);
   box-shadow:inset 6px 0 0 rgba(255,255,255,.08),inset -6px 0 0 rgba(0,0,0,.12);overflow:hidden;
   writing-mode:vertical-rl;font:700 11px/38px var(--f-text);letter-spacing:.14em;color:rgba(255,255,255,.92);white-space:nowrap;text-align:end}
 .ip-clip{position:absolute;left:50%;top:calc(var(--w) * .075 - var(--tab));z-index:2;width:calc(var(--w) * .12);height:var(--tab);translate:-50% 0;
@@ -914,7 +918,7 @@ html:not([data-swift]) .envelope-paper .more{animation:no-swift .6s var(--ease-o
 @media (prefers-reduced-motion:reduce){.portrait .glyph img{animation:none}}
 
 /* sponsorship: no saturated colour backgrounds and no card shadows (Patricia doesn't like them) */
-.sponsorship{padding-top:clamp(24px,4vh,48px)}   /* follows the team: without the double gap of two sections */
+.sponsorship{padding-top:clamp(24px,calc(4 * var(--lvh)),48px)}   /* follows the team: without the double gap of two sections */
 .laptop{container-type:inline-size}
 .lid{position:relative;aspect-ratio:16/10;border-radius:3.4cqw;overflow:hidden;
   background:linear-gradient(160deg,#F1F2F4,#DCDEE3 55%,#CDD0D6);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8),inset 0 0 0 .3cqw rgba(0,0,0,.035)}
@@ -964,7 +968,7 @@ a.sponsor-sticker:hover{rotate:0deg;scale:1.06}
 @media (prefers-reduced-motion:reduce){.sponsor-sticker{transition:none}.lid::after{display:none}}
 @media (max-width:640px){
   .hero{grid-template-rows:calc(64px + var(--sa-t)) auto auto;align-content:center;gap:8px}
-  .stage{width:min(88vw,calc(38svh * (3005 / 2345)))}
+  .stage{width:min(88vw,calc(calc(38 * var(--svh)) * (3005 / 2345)))}
   .copy{padding-bottom:112px;gap:14px}
   .signup-legal{max-width:32ch;margin-top:-4px}
 }
@@ -1006,17 +1010,17 @@ body.clean .tbd{background:none}
 /* short landscape (rotated iPhone): logo left, headline and form right, all on the first screen */
 @media (orientation:landscape) and (max-height:520px){
   .hero{grid-template-rows:calc(64px + var(--sa-t)) 1fr;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-content:stretch;align-items:center;gap:0 12px;
-    padding-inline:var(--sa-l) var(--sa-r);min-height:100svh}
+    padding-inline:var(--sa-l) var(--sa-r);min-height:calc(100 * var(--svh))}
   .hero > nav,.hero .glyph-layer,.hero .selection{grid-column:1 / -1}
   .wrap{grid-row:2;grid-column:1;padding:0 0 12px 12px}
-  .stage{width:min(46vw,calc(62svh * (3005 / 2345)))}
+  .stage{width:min(46vw,calc(calc(62 * var(--svh)) * (3005 / 2345)))}
   .copy{grid-row:2;grid-column:2;align-items:flex-start;text-align:left;padding:0 16px 16px 0;gap:12px}
   .copy h1{font-size:clamp(22px,4.2vw,30px)}
   .signup{width:100%}
   .signup-note,.signup-legal{text-align:left}
   .hero .glyph-layer{display:none}   /* at such a short height the glyphs overlap the logo and the text */
 }
-@media (orientation:landscape) and (max-height:520px) and (pointer:coarse){.hero{min-height:calc(100lvh + 120px);padding-bottom:calc(120px + var(--sa-b))}}
+@media (orientation:landscape) and (max-height:520px) and (pointer:coarse){.hero{min-height:calc(calc(100 * var(--lvh)) + 120px);padding-bottom:calc(120px + var(--sa-b))}}
 
 /* For the bottom bar, WebKit ignores a sticky layer as tall as the screen (treats it as an overlay and keeps the previous colour):
    the fixed container paints nothing of its own and Safari looks at the manifesto's black background */
